@@ -2,6 +2,7 @@
 #include"modelbase.h"
 #include"../render/render.h"
 #include"../root.h"
+#include"../render/texture.h"
 namespace myrender {
 	class Box:public ModelBase
 	{

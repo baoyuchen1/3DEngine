@@ -14,9 +14,8 @@ myrender::Box::~Box()
 
 void myrender::Box::InitTexture(char * imagepath)
 {
-	Texture_Data temp;
-	temp.texturepath = imagepath;
-	temp.enable = true;
+	Texture temp;
+	temp.Init(imagepath);
 	_texturevector.push_back(temp);
 }
 

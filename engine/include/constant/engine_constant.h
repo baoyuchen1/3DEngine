@@ -1,9 +1,12 @@
 #pragma once
 #include<glm\glm.hpp>
 #define PROJECT_PATH  "C:\Users\baoyuchen\Documents\Visual Studio 2017\Projects\My3Dproject\My3Dproject"
-#define TEXTUREVECTOR     std::vector<Texture_Data>
-#define TEXTUREVECTORITOR  std::vector<Texture_Data>::iterator
+#define TEXTUREVECTOR     std::vector<Texture>
+#define TEXTUREVECTORITOR  std::vector<Texture>::iterator
 #define SHADERPROVECTOR    std::vector<ShaderProperty>
+#define VBO_SIZE      65535
+#define INDICE_SIZE   65535
+#define STRING        std::string
 
 struct V3F_V3F_V2F
 {
@@ -31,6 +34,15 @@ struct  Box_Quad_Type
 	};
 
 };
+
+struct Triangle_Data
+{
+	V3F_V3F_V2F *quad;
+	unsigned short*   indics;
+	int indics_size;
+	int quad_size;
+};
+
 struct Texture_Data
 {
 	GLenum textureTarget;  //GL_TEXTURE0
@@ -39,4 +51,5 @@ struct Texture_Data
 	std::string texturepath;
 	int width, height, nrChannels;
 	bool enable;
+	bool  useMipmap;
 };

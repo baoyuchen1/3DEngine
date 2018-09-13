@@ -3,6 +3,7 @@
 #include "../constant/includefile.h"
 #include "../render/shader.h"
 #include "../render/image.h"
+#include"texture.h"
 namespace myrender {
 	class Render
 	{
@@ -18,8 +19,8 @@ namespace myrender {
 		void BindTexture();
 		void UseShder();
 		void Release();
-		int LoadTexture();
-		int InitTexture(char* imagepath);
+		void LoadTexture();
+		void InitTexture(char* imagepath);
 		int Draw();
 	private:
 		Render();

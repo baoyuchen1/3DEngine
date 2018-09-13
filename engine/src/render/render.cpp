@@ -1,4 +1,5 @@
 #include"../../include/render/render.h"
+
 namespace myrender {
 	Render* Render::instance = nullptr;
 	Render::Render()
@@ -51,18 +52,18 @@ namespace myrender {
 		glBindVertexArray(VAO);
 
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, verticessize, vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, VBO_SIZE*sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicessize, indices, GL_STATIC_DRAW);
 		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)0);
 		glEnableVertexAttribArray(0);
 		// color attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 		// texture coord attribute
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
 		return 0;
 	}
@@ -102,10 +103,9 @@ namespace myrender {
 	{
 		for (auto &it : texturevector)
 		{
-			if (it.enable)
+			if (it.GetEnable())
 			{
-				glActiveTexture(it.textureTarget);
-				glBindTexture(it.textureType, it.texture);
+
 			}
 		}
 	}
@@ -157,48 +157,21 @@ namespace myrender {
 		glfwTerminate();
 	}
 
-	int Render::LoadTexture()
+	void Render::LoadTexture()
 	{ 
 		auto image = Image::getInstance();
 		image->SetFlipVerticallOnLoad(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-		int i = 0;
 		for (auto &it : texturevector)
 		{
-			glGenTextures(1, &it.texture);
-			glBindTexture(GL_TEXTURE_2D, it.texture);
-			// set the texture wrapping parameters
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			// set texture filtering parameters
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			unsigned char *data = image->LoadImageData(it.texturepath.c_str(), &it.width, &it.height, &it.nrChannels, 0);
-			if (data)
-			{
-				it.textureType = GL_TEXTURE_2D;
-				it.textureTarget = GL_TEXTURE0 + i;
-				it.enable = true;
-				i++;
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, it.width, it.height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-				glGenerateMipmap(GL_TEXTURE_2D);
-			}
-			else
-			{   
-				it.enable = false;
-				std::cout << "Failed to load texture" << std::endl;
-			}
-			image->FreeImage(data);
-		}
-		return 0;
+			it.LoadTexture();
+		} 
 	}
 
-	int Render::InitTexture(char * imagepath)
+	void Render::InitTexture(char * imagepath)
 	{
-		Texture_Data temp;
-		temp.texturepath = imagepath;
-		temp.enable = true;
+		Texture temp;
+		temp.Init(imagepath);
 		texturevector.push_back(temp);
-		return 0;
 	}
 
 
