@@ -1,6 +1,7 @@
 #pragma once
 #include"../unit/object.h"
 #include"../constant/engine_constant.h"
+#include"shader.h"
 #include"image.h"
 #include<string>
 namespace myrender
@@ -10,6 +11,7 @@ namespace myrender
 	public:
 		Texture();
 		~Texture();
+		Texture(const char* texture_path);
 		const STRING GetPath();
 		int GetWidth();
 		int GetHeight();
@@ -20,6 +22,7 @@ namespace myrender
 		void BlindTexture();
 		void Init(STRING texture_path);
 		void LoadTexture();
+		virtual void Release();
 	private:
 		static unsigned int _index;
 		Texture_Data _textureData;

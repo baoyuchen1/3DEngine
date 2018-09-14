@@ -8,7 +8,6 @@ namespace myrender
 	public:
 		ModelBase() {};
 		~ModelBase() {};
-		virtual void render() = 0;
 	private:
 
 	};

@@ -9,6 +9,7 @@ namespace myrender
 		RenderTriangle();
 		~RenderTriangle();
 		void Init(Texture* texture, Triangle_Data* triangle);
+		void SetTriangleData(Triangle_Data *data);
 		virtual void BlindTexture();
 		virtual void LoadTexture();
 		virtual void Draw();

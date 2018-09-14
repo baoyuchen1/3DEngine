@@ -13,9 +13,17 @@ void myrender::RenderTriangle::Init(Texture * texture, Triangle_Data * triangle)
 	_texture = texture;
 	_triangle = triangle;
 }
+void myrender::RenderTriangle::SetTriangleData(Triangle_Data * data)
+{
+	_triangle = data;
+}
 void myrender::RenderTriangle::BlindTexture()
 {
-	_texture->BlindTexture();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, 1);
+	//_texture->BlindTexture();
 }
 void myrender::RenderTriangle::LoadTexture()
 {
@@ -23,16 +31,20 @@ void myrender::RenderTriangle::LoadTexture()
 }
 void myrender::RenderTriangle::Draw()
 {
+	BlindTexture();
+	glBindVertexArray(_buffersVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 void myrender::RenderTriangle::Release()
 {
+	_texture->Release();
 }
 
 void myrender::RenderTriangle::LoadVertexArry()
 {
 	glGenVertexArrays(1, &_buffersVAO);
 	glGenBuffers(1, &_buffersVBO[0]);
-	glGenBuffers(1, &_buffersVBO[1 ]);
+	glGenBuffers(1, &_buffersVBO[1]);
 
 	glBindVertexArray(_buffersVAO);
 

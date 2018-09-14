@@ -101,7 +101,7 @@ namespace myrender {
 
 	void Render::BindTexture()
 	{
-		for (auto &it : texturevector)
+		for (auto &it : _texturevector)
 		{
 			if (it.GetEnable())
 			{
@@ -161,7 +161,7 @@ namespace myrender {
 	{ 
 		auto image = Image::getInstance();
 		image->SetFlipVerticallOnLoad(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-		for (auto &it : texturevector)
+		for (auto &it : _texturevector)
 		{
 			it.LoadTexture();
 		} 
@@ -169,22 +169,26 @@ namespace myrender {
 
 	void Render::InitTexture(char * imagepath)
 	{
-		Texture temp;
-		temp.Init(imagepath);
-		texturevector.push_back(temp);
 	}
+
+	void Render::AddRenderCommand(RenderCommand * command)
+	{
+		_commandlist.push_back(command);
+	}
+
+
 
 
 	int Render::Draw()
 	{
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		// bind textures on corresponding texture units
-		BindTexture();
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		for (auto &it : _commandlist)
+		{
+			it->Draw();
+		}
 		UseShder();
+		_commandlist.clear();
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window);

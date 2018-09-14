@@ -5,7 +5,7 @@ namespace myrender {
 	public:
 		Object();
 		~Object();
-
+		virtual void Release() = 0;
 	private:
 
 	};

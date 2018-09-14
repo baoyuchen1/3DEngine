@@ -1,18 +1,29 @@
 #pragma once
-#include<glm\glm.hpp>
+#include"includefile.h"
 #define PROJECT_PATH  "C:\Users\baoyuchen\Documents\Visual Studio 2017\Projects\My3Dproject\My3Dproject"
 #define TEXTUREVECTOR     std::vector<Texture>
 #define TEXTUREVECTORITOR  std::vector<Texture>::iterator
 #define SHADERPROVECTOR    std::vector<ShaderProperty>
+#define RENDERQUADVECTOR   std::vector<RenderCommand*>
+#define RENDERQUADVECTORITOR   std::vector<RenderCommand*>::iterator
+#define RENDERTRIANGLEQUADVECTOR   std::vector<RenderTriangle>
 #define VBO_SIZE      65535
 #define INDICE_SIZE   65535
 #define STRING        std::string
 
 struct V3F_V3F_V2F
 {
-	glm::vec3 pos;
-	glm::vec3 color;
-	glm::vec2 textcoord;
+	union
+	{
+		struct
+		{
+			glm::vec3 pos;
+			glm::vec3 color;
+			glm::vec2 textcoord;
+		};
+		float M[8];
+	};
+
 };
 
 struct  Box_Quad_Type
@@ -48,7 +59,7 @@ struct Texture_Data
 	GLenum textureTarget;  //GL_TEXTURE0
 	GLenum textureType;    //GL_TEXTURE_2D
 	unsigned int texture;
-	std::string texturepath;
+	STRING texturepath;
 	int width, height, nrChannels;
 	bool enable;
 	bool  useMipmap;

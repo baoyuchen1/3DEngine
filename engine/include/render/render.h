@@ -1,9 +1,6 @@
 #pragma once
-
-#include "../constant/includefile.h"
-#include "../render/shader.h"
-#include "../render/image.h"
 #include"texture.h"
+#include"rendercommand.h"
 namespace myrender {
 	class Render
 	{
@@ -21,6 +18,7 @@ namespace myrender {
 		void Release();
 		void LoadTexture();
 		void InitTexture(char* imagepath);
+		void AddRenderCommand(RenderCommand *command);
 		int Draw();
 	private:
 		Render();
@@ -32,6 +30,7 @@ namespace myrender {
 		int view_height;		
 		unsigned int VBO, VAO, EBO;
 		std::vector<Shader*>  OurShader;
-        TEXTUREVECTOR     texturevector;
+        TEXTUREVECTOR     _texturevector;
+		RENDERQUADVECTOR  _commandlist;
 	};
 }

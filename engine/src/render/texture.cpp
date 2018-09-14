@@ -8,6 +8,11 @@ myrender::Texture::~Texture()
 {
 }
 
+myrender::Texture::Texture(const char * texture_path)
+{
+	Init(texture_path);
+}
+
 const STRING myrender::Texture::GetPath()
 {
 	return _textureData.texturepath;
@@ -82,5 +87,9 @@ void myrender::Texture::LoadTexture()
 		std::cout << "Failed to load texture" << std::endl;
 	}
 	image->FreeImage(data);
+}
+
+void myrender::Texture::Release()
+{
 }
 
