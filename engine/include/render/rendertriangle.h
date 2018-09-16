@@ -1,6 +1,7 @@
 #pragma once
 #include"rendercommand.h"
 #include"texture.h"
+#include"render.h"
 namespace myrender
 {
 	class RenderTriangle :public RenderCommand

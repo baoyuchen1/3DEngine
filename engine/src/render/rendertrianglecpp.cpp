@@ -19,11 +19,7 @@ void myrender::RenderTriangle::SetTriangleData(Triangle_Data * data)
 }
 void myrender::RenderTriangle::BlindTexture()
 {
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, 1);
-	//_texture->BlindTexture();
+	_texture->BlindTexture();
 }
 void myrender::RenderTriangle::LoadTexture()
 {
@@ -32,6 +28,8 @@ void myrender::RenderTriangle::LoadTexture()
 void myrender::RenderTriangle::Draw()
 {
 	BlindTexture();
+	auto render = myrender::Render::getInstance();
+	render->UseShder();
 	glBindVertexArray(_buffersVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
