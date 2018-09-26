@@ -22,6 +22,7 @@ namespace myrender
 		void BlindTexture();
 		void Init(STRING texture_path);
 		void LoadTexture();
+		GLuint GetTextureIndex();
 		virtual void Release();
 	private:
 		static unsigned int _index;

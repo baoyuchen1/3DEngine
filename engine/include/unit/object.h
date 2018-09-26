@@ -5,6 +5,7 @@ namespace myrender {
 	public:
 		Object();
 		~Object();
+		Object(const Object&);
 		virtual void Release() = 0;
 	private:
 

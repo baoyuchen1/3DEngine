@@ -89,6 +89,11 @@ void myrender::Texture::LoadTexture()
 	image->FreeImage(data);
 }
 
+GLuint myrender::Texture::GetTextureIndex()
+{
+	return _textureData.texture;
+}
+
 void myrender::Texture::Release()
 {
 }

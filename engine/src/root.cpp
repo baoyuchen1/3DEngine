@@ -1,3 +1,4 @@
+
 #include"../include/root.h"
 using namespace myrender;
 Root* Root::instance = nullptr;
@@ -15,6 +16,10 @@ Render* myrender::Root::getRender()
 Image* myrender::Root::getImage()
 {
 	return Image::getInstance();
+}
+ViewPort * myrender::Root::getViewPort()
+{
+	return ViewPort::getInsatnce();
 }
 Root::Root()
 {

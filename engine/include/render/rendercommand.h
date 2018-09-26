@@ -1,5 +1,5 @@
 #pragma once
-#include"../constant/includefile.h"
+#include"../constant/engine_constant.h"
 namespace myrender {
 	class RenderCommand
 	{   
@@ -7,7 +7,6 @@ namespace myrender {
 		RenderCommand();
 		~RenderCommand();
 		virtual void Draw() ;
-		virtual void BlindTexture();
 		virtual void LoadTexture();
 		virtual void Release();
 		virtual void LoadVertexArry();

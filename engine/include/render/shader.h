@@ -1,15 +1,7 @@
 #pragma once
 #ifndef SHADER_H
 #define SHADER_H
-
-#include <glad/glad.h> // 包含glad来获取所有的必须OpenGL头文件
-#include "../constant/engine_constant.h"
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <vector>
-#include <glm\gtc\type_ptr.hpp>
+#include"../constant/includefile.h"
 namespace myrender {
 	class Shader
 	{
@@ -125,6 +117,10 @@ namespace myrender {
 			propertyvector.push_back(temp);
      		setInt(name, value);
 		}
+		void setShaderproperty(const std::string &name, glm::mat4 &trans)
+		{
+			setMat4(name, trans);
+		}
 	private:
 		enum PROPERTYVALUETYPE
 		{
@@ -135,12 +131,12 @@ namespace myrender {
 		struct ShaderProperty
 		{
 			std::string propertyname;
-			//union 
-			//{
+			union 
+			{
 				float fvalue;
 				int   ivalue;
 				bool  bvalue;
-			//};
+			};
 			PROPERTYVALUETYPE propertytype;
 
 		};

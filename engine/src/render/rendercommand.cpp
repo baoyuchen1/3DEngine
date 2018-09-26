@@ -13,10 +13,6 @@ void myrender::RenderCommand::Draw()
 {
 }
 
-void myrender::RenderCommand::BlindTexture()
-{
-}
-
 void myrender::RenderCommand::LoadTexture()
 {
 }

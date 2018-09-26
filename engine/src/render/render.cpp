@@ -1,11 +1,10 @@
 #include"../../include/render/render.h"
-
+#include"../../include/camera/camera.h"
 namespace myrender {
 	Render* Render::instance = nullptr;
 	Render::Render()
 	{
-		view_weight = 960;
-		view_height = 720;
+		_texture_map.clear();
 	}
 	Render * Render::getInstance()
 	{
@@ -14,47 +13,29 @@ namespace myrender {
 		return instance;
 	}
 
-	GLFWwindow* Render::Init_Render(GLFWframebuffersizefun framebuffer_size_callback)
+	void Render::Init_Render()
 	{
-		glfwInit();
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		auto viewport = Root::getInstance()->getViewPort();
+		viewport->InitViewPort();
+		_camera = new Camera(glm::vec3(0.0f, 0.0f, 3.0f));
+		Camera::RegisterKeyboardCallback();
+		Camera::RegisterMousemoveCallback();
+		Camera::RegisterMousescrollCallback();
 
-#ifdef __APPLE__
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
-#endif
-		window = glfwCreateWindow(view_weight, view_height, "LearnOpenGL", NULL, NULL);
-		if (window == nullptr)
-		{
-			std::cout << "Failed to create GLFW window" << std::endl;
-			glfwTerminate();
-			return nullptr;
-		}
-		glfwMakeContextCurrent(window);
-		glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-		// glad: load all OpenGL function pointers
-		// ---------------------------------------
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-		{
-			std::cout << "Failed to initialize GLAD" << std::endl;
-			return nullptr;
-		}
-		return window;
 	}
 
 	int Render::LoardVertexArry(float vertices[], unsigned int indices[], int verticessize, int indicessize)
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
+		glGenVertexArrays(1, &_VAO);
+		glGenBuffers(1, &_VBO);
+		glGenBuffers(1, &_EBO);
 
-		glBindVertexArray(VAO);
+		glBindVertexArray(_VAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 		glBufferData(GL_ARRAY_BUFFER, VBO_SIZE*sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicessize, indices, GL_STATIC_DRAW);
 		// position attribute
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)0);
@@ -70,50 +51,57 @@ namespace myrender {
 
 	int Render::LoardVertexArry(float vertices[], int verticessize)
 	{
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
+		glGenVertexArrays(1, &_VAO);
+		glGenBuffers(1, &_VBO);
 
-		glBindVertexArray(VAO);
+		glBindVertexArray(_VAO);
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 		glBufferData(GL_ARRAY_BUFFER, verticessize, vertices, GL_STATIC_DRAW);
 
-		// position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		// Position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
-		// texture coord attribute
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		return 0;
+		// TexCoord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0); // Unbind VAO
+		return _VAO;
 	}
 
 	void Render::setShaderproperty(int shaderID, const std::string & name, bool value)
 	{ 
 		for (auto &it : OurShader)
 		{
-			if (it->ID == shaderID)
+			if (it.second->ID == shaderID)
 			{
-				it->setShaderproperty(name, value);
+				it.second->setShaderproperty(name, value);
 				break;
 			}
 		}
 	}
 
-	void Render::BindTexture()
+	void Render::setShaderproperty(int shaderID, const std::string & name, glm::mat4 value)
 	{
-		for (auto &it : _texturevector)
+		for (auto &it : OurShader)
 		{
-			if (it.GetEnable())
+			if (it.second->ID == shaderID)
 			{
-
+				it.second->setShaderproperty(name, value);
+				break;
 			}
 		}
 	}
 
-	int Render::IncludeShader(const GLchar * vertexPath, const GLchar * fragmentPath)
+
+	int Render::IncludeShader(const GLchar * Path)
 	{
-		auto shader = new Shader(vertexPath, fragmentPath);
-		OurShader.push_back(shader);
+		STRING path = STRING(Path);
+		STRING vertexPath = SHADER_PATH + path + VSSUFFIX;
+		STRING fragmentPath = SHADER_PATH + path + FSSUFFIX;
+		auto shader = new Shader(vertexPath.c_str(), fragmentPath.c_str());
+		OurShader[path] = shader;
 		return shader->ID;
 	}
 
@@ -121,9 +109,9 @@ namespace myrender {
 	{
 		for (auto &it : OurShader)
 		{
-			if (it->ID == shaderID)
+			if (it.second->ID == shaderID)
 			{
-				it->setShaderproperty(name, value);
+				it.second->setShaderproperty(name, value);
 				break;
 			}
 		}
@@ -133,9 +121,9 @@ namespace myrender {
 	{
 		for (auto &it : OurShader)
 		{
-			if (it->ID == shaderID)
+			if (it.second->ID == shaderID)
 			{
-				it->setShaderproperty(name, value);
+				it.second->setShaderproperty(name, value);
 				break;
 			}
 		}
@@ -145,26 +133,16 @@ namespace myrender {
 	{
 		for (auto &it : OurShader)
 		{
-			it->use();
+			it.second->use();
 		}
 	}
 
 	void Render::Release()
 	{
-		glDeleteVertexArrays(1, &VAO);
-		glDeleteBuffers(1, &VBO);
-		glDeleteBuffers(1, &EBO);
+		glDeleteVertexArrays(1, &_VAO);
+		glDeleteBuffers(1, &_VBO);
+		glDeleteBuffers(1, &_EBO);
 		glfwTerminate();
-	}
-
-	void Render::LoadTexture()
-	{ 
-		auto image = Image::getInstance();
-		image->SetFlipVerticallOnLoad(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-		for (auto &it : _texturevector)
-		{
-			it.LoadTexture();
-		} 
 	}
 
 	void Render::InitTexture(char * imagepath)
@@ -173,41 +151,105 @@ namespace myrender {
 
 	void Render::AddRenderCommand(RenderCommand * command)
 	{
-		_commandlist.push_back(command);
+		_command_list.push_back(command);
+	}
+
+	void Render::BlindTexture()
+	{
+		int shader = OurShader["transform"]->ID;
+		int i = 1;
+		for (auto &it : _texture_map)
+		{
+			it.second->BlindTexture();
+			std::string res = "ourTexture" + std::to_string(i);
+			setShaderproperty(shader, res, i - 1);
+			i++;
+		}
+	}
+
+	bool Render::CheckTextureExist(char * name)
+	{
+		return (_texture_map[name]==nullptr);
+	}
+
+	GLuint Render::SetTexture(char * t)
+	{
+		if (t == nullptr)
+			return -1;
+
+		if (CheckTextureExist(t))
+		{
+			auto texture = new Texture();
+			texture->Init(t);
+			texture->LoadTexture();
+			_texture_map[t] = texture;
+			return texture->GetTextureIndex();
+		}
+		return -1;
 	}
 
 
-
+	int Render::GetShaderByName(char * name)
+	{
+		if (OurShader[name])
+			return OurShader[name]->ID;
+		return -1;
+	}
 
 	int Render::Draw()
 	{
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		
-		for (auto &it : _commandlist)
-		{
-		//	it->Draw();
-		}
-
-		// render
-		// ------
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		// bind textures on corresponding texture units
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		UseShder();
-		// render container
-		glBindVertexArray(1);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		//_commandlist.clear();
-		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-		// -------------------------------------------------------------------------------
-		glfwSwapBuffers(window);
+		auto viewport = Root::getInstance()->getViewPort();
+		viewport->UpdateDeltaTime();
+		_view = _camera->GetViewMatrix();
+		_projection = glm::make_mat4x4(InitMat4);
+		int width = viewport->GetScreenWidth();
+		int height = viewport->GetScreenHeight();
+		_projection = glm::perspective(_camera->Zoom, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
+		int shader = OurShader["transform"]->ID;
 		glfwPollEvents();
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		setShaderproperty(shader, "view", _view);
+		setShaderproperty(shader, "projection", _projection);
+		UseShder();
+		glBindVertexArray(_VAO);
+		for (auto &it : _command_list)
+		{
+			it->Draw();
+		}
+		_command_list.clear();
+		glBindVertexArray(0);
+
+		// Swap the screen buffers
+		viewport->SwapBuffers();
 		return 0;
 	}
+
+	void Render::SetVAO(float * vertices, int vertocessize)
+	{
+		glGenVertexArrays(1, &_VAO);
+		glGenBuffers(1, &_VBO);
+
+		glBindVertexArray(_VAO);
+
+		glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+		glBufferData(GL_ARRAY_BUFFER, vertocessize, vertices, GL_STATIC_DRAW);
+
+		// Position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+		// TexCoord attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0); // Unbind VAO
+	}
+
+	Camera * Render::GetCamera()
+	{
+		return _camera;
+	}
+
 
 }
 

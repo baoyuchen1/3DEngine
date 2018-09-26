@@ -4,8 +4,9 @@ using namespace myrender;
 Box::Box()
 {
 	_triangle_data = new Triangle_Data();
-	_texture = new Texture();
+	_triangle_data_i = new Triangle_Data_WithOut_Indics();
 	_command = new RenderTriangle();
+	_model_mat = glm::make_mat4x4(InitMat4);
 	//_initVAO();
 }
 
@@ -17,9 +18,8 @@ myrender::Box::~Box()
 
 void myrender::Box::InitTexture(char * imagepath)
 {
-	_texture->Init(imagepath);
-	_command->Init(_texture, _triangle_data);
-	_command->LoadTexture();
+	auto render = myrender::Root::getInstance()->getRender();
+	render->SetTexture(imagepath);
 }
 
 int myrender::Box::LoadTexture()
@@ -28,11 +28,11 @@ int myrender::Box::LoadTexture()
 	return 0;
 }
 
-void myrender::Box::InitVertices(float* vertices, unsigned short* indics, int indicssize, int vertocessize)
+void myrender::Box::InitVertices(float* vertices, unsigned int* indics, int indicssize, int vertocessize)
 {
 	_triangle_data->quad_size = vertocessize;
 	_triangle_data->quad = new V3F_V3F_V2F[vertocessize / sizeof(V3F_V3F_V2F)];
-	_triangle_data->indics = new unsigned short[indicssize / sizeof(float)];
+	_triangle_data->indics = new unsigned int[indicssize / sizeof(float)];
 	memcpy(_triangle_data->quad, vertices, vertocessize);
 	_triangle_data->indics_size = indicssize;
 	memcpy(_triangle_data->indics, indics, indicssize);
@@ -40,10 +40,20 @@ void myrender::Box::InitVertices(float* vertices, unsigned short* indics, int in
 	_command->LoadVertexArry();
 }
 
-void myrender::Box::draw()
+void myrender::Box::InitVertices(float * vertices, int vertocessize)
+{
+	_triangle_data_i->quad_size = vertocessize;
+	_triangle_data_i->quad = new V3F_V2F[vertocessize / sizeof(V3F_V2F)];
+	memcpy(_triangle_data_i->quad, vertices, vertocessize);
+	_command->SetTriangleData(_triangle_data_i);
+}
+
+void myrender::Box::Draw()
 {
 	auto render = Render::getInstance();
-	_command->Init(_texture, _triangle_data);
+	_command->SetTriangleData(_triangle_data_i);
+	_command->SetShader(_shader);
+	_command->SetTransform(_model_mat);
 	render->AddRenderCommand(_command);
 }
 
@@ -51,31 +61,18 @@ void myrender::Box::Release()
 {
 }
 
-
-
-void myrender::Box::_initVAO()
+void myrender::Box::SetWorldPos(const glm::vec3 & p)
 {
-	glDeleteBuffers(2, &_VBO);
-	glDeleteVertexArrays(1, &_VAO);
-	glBindVertexArray(0);
-	glGenVertexArrays(1, &_VAO);
-	glGenBuffers(1, &_VBO);
-	glGenBuffers(1, &_EBO);
+	_world_pos = p;
+}
 
-	glBindVertexArray(_VAO);
+void myrender::Box::SetShader(int s)
+{
+	_shader = s;
+}
 
-	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Box_Quad_Type)*VBO_SIZE, _quads, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indicssize*VBO_SIZE, _indics, GL_STATIC_DRAW);
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+void myrender::Box::MadeModelMat(glm::vec3 Pos, GLfloat angle, glm::vec3 aixs)
+{
+	_model_mat = glm::translate(_model_mat, Pos);//构造平移矩阵
+	_model_mat = glm::rotate(_model_mat, angle, aixs);//构造旋转矩阵
 }

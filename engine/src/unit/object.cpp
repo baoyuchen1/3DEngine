@@ -8,3 +8,7 @@ myrender::Object::Object()
 myrender::Object::~Object()
 {
 }
+
+myrender::Object::Object(const Object &)
+{
+}
