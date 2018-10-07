@@ -105,6 +105,10 @@ int myrender::ViewPort::GetScreenHeight()
 {
 	return _view_height;
 }
+GLFWwindow * myrender::ViewPort::GetWindows()
+{
+	return _windows;
+}
 void myrender::ViewPort::_framebuffer_size_callback(GLFWwindow * windows, int width, int height)
 {
 	 
@@ -129,9 +133,9 @@ void myrender::ViewPort::_mousescroll_callback(GLFWwindow * window, double xoffs
 }
 myrender::ViewPort::ViewPort()
 {
-	_view_width = 960;
-	_view_height = 720;
-	_view_name = "test";
+	_view_width = 1920;
+	_view_height = 1080;
+	_view_name = "XIEDAJIAO";
 	_mousemove_event = MouseMoveEvent(); 
 }
 

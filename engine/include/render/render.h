@@ -2,10 +2,12 @@
 #include"texture.h"
 #include"rendercommand.h"
 #include"../root.h"
+#include"lighting.h"
 // GLEW
 
 namespace myrender {
 	class Camera;
+	class Lighting;
 	class Render
 	{
 	public:
@@ -14,11 +16,13 @@ namespace myrender {
 		int LoardVertexArry(float vertices[], unsigned int indices[],int verticessize,int indicessize);
 		int LoardVertexArry(float vertices[], int verticessize);
 		int IncludeShader(const GLchar*);
-		void setShaderproperty(int shaderID, const std::string &name, float value);
-		void setShaderproperty(int shaderID, const std::string &name, int value);
-		void setShaderproperty(int shaderID, const std::string &name, bool value);
-		void setShaderproperty(int shaderID, const std::string &name, glm::mat4 value);
+		void setShaderproperty(int shaderID, const STRING &name, float value);
+		void setShaderproperty(int shaderID, const STRING &name, int value);
+		void setShaderproperty(int shaderID, const STRING &name, bool value);
+		void setShaderproperty(int shaderID, const STRING &name, MAT4 value);
+		void setShaderproperty(int shaderID, const STRING &name, VEC3 value);
 		void UseShder();
+		void UseShader(const STRING &name);
 		void Release();
 		void InitTexture(char* imagepath);
 		void AddRenderCommand(RenderCommand *command);
@@ -29,17 +33,30 @@ namespace myrender {
 		int Draw();
 		void SetVAO(float * vertices, int vertocessize);
 		Camera* GetCamera();
+		GLint GetVBO();
+		int GetShaderByName(STRING shadername);
+		void CreatNewLighting(const VEC3 &pos, const VEC3 &color, Lighting_type);
+		Lighting* GetLightByIndex(const int& index);
+		void SetLightModel(const MAT4 &m);
+		void ReadyForDraw();
+		void RenderBackGround();
+		MAT4 GetViewMat();
+		MAT4 GetProjectionMat();
 	private:
 		Render();
 		//把复制构造函数和=操作符也设为私有,防止被复制
 		Render(const Render&);
+		void _drawLighting();
+		void _drawBox();
+		void _generateViewMat4();
 		static Render* instance;		
 		Camera*     _camera;
 		unsigned int _VBO, _VAO, _EBO;
 		MAP<STRING,Shader*>  OurShader;
-		RENDERQUADVECTOR  _command_list;
-		TEXTUREMAP        _texture_map;
-		glm::mat4    _projection;
-		glm::mat4    _view;
+		RENDERQUADVECTOR  _commandList;
+		LIGHTINGVECTOR    _lightingList;
+		TEXTUREMAP        _textureMap;
+		MAT4    _projection;
+		MAT4    _view;
 	};
 }

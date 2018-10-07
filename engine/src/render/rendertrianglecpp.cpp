@@ -26,6 +26,10 @@ void myrender::RenderTriangle::SetTexture(Texture * texture)
 {
 	_texture_vector.push_back(texture);
 }
+void myrender::RenderTriangle::SetMaterial(const Material &m)
+{
+	_material = m;
+}
 void myrender::RenderTriangle::SetTriangleData(Triangle_Data_WithOut_Indics * data)
 {
 	_triangle_i = data;
@@ -41,6 +45,19 @@ void myrender::RenderTriangle::SetTransform(glm::mat4 t)
 	_transform = t;
 }
 
+void myrender::RenderTriangle::SetMaterialShader()
+{
+	auto render = myrender::Render::getInstance();
+	int shader = render->GetShaderByName("pointlighting");
+	render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
+	render->setShaderproperty(shader, "material.specular", _material.specular - 1);
+	render->setShaderproperty(shader, "material.shininess", _material.shininess);
+	shader = render->GetShaderByName("directionlighting");
+	render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
+	render->setShaderproperty(shader, "material.specular", _material.specular - 1);
+	render->setShaderproperty(shader, "material.shininess", _material.shininess);
+}
+
 void myrender::RenderTriangle::LoadTexture()
 {
 	for (auto &it : _texture_vector)
@@ -51,7 +68,8 @@ void myrender::RenderTriangle::LoadTexture()
 void myrender::RenderTriangle::Draw()
 {
 	auto render = myrender::Render::getInstance();
-	render->setShaderproperty(_shader, "model", _transform);
+	render->SetLightModel(_transform);
+	SetMaterialShader();
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 void myrender::RenderTriangle::Release()
@@ -64,27 +82,6 @@ void myrender::RenderTriangle::Release()
 
 void myrender::RenderTriangle::LoadVertexArry()
 {
-	/*glGenVertexArrays(1, &_buffers_VAO);
-	glGenBuffers(1, &_buffers_VBO[0]);
-	glGenBuffers(1, &_buffers_VBO[1]);
-
-	glBindVertexArray(_buffers_VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, _buffers_VBO[0]);
-	glBufferData(GL_ARRAY_BUFFER, _triangle->quad_size, _triangle->quad, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffers_VBO[1]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, _triangle->indics_size, _triangle->indics, GL_STATIC_DRAW);
-	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)0);
-	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_V3F_V2F), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	*/
 	glGenVertexArrays(1, &_buffers_VAO);
 	glGenBuffers(1, &_buffers_VBO[0]);
 

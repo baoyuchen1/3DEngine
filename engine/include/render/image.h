@@ -1,5 +1,6 @@
 #pragma once
 #include"../constant/includefile.h"
+
 namespace myrender
 {
 	class Image

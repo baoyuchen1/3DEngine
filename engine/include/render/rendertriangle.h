@@ -13,9 +13,11 @@ namespace myrender
 		void SetTriangleData(Triangle_Data *data);
 		void Init(Texture* texture, Triangle_Data_WithOut_Indics* triangle);
 		void SetTexture(Texture* texture);
+		void SetMaterial(const Material&);
 		void SetTriangleData(Triangle_Data_WithOut_Indics *data);
 		void SetShader(int shader);
 		void SetTransform(glm::mat4 t);
+		void SetMaterialShader();
 		virtual void LoadTexture();
 		virtual void Draw();
 		virtual void Release();
@@ -27,6 +29,7 @@ namespace myrender
 		GLuint _buffers_VAO;
 		GLuint _buffers_VBO[2]; //0: vertex  1: indices
 		int    _shader;
+		Material _material;
 		glm::mat4 _transform;
 	};
 }

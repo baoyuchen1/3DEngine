@@ -1,14 +1,17 @@
 #pragma once
 #ifndef SHADER_H
 #define SHADER_H
-#include"../constant/includefile.h"
+#include"../constant/engine_constant.h"
 namespace myrender {
 	class Shader
 	{
 	public:
 		// 程序ID
-		unsigned int ID;
-
+		
+		unsigned int GetID()
+		{
+			return ID;
+		}
 		// 构造器读取并构建着色器
 		Shader(const GLchar* vertexPath, const GLchar* fragmentPath)
 		{
@@ -71,26 +74,30 @@ namespace myrender {
 			glUseProgram(ID);
 		}
 		// uniform工具函数
-		void setBool(const std::string &name, bool value) const
+		void setBool(const STRING &name, bool value) const
 		{
 			glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 		}
 		// ------------------------------------------------------------------------
-		void setInt(const std::string &name, int value) const
+		void setInt(const STRING &name, int value) const
 		{
 			glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 		}
 		// ------------------------------------------------------------------------
-		void setFloat(const std::string &name, float value) const
+		void setFloat(const STRING &name, float value) const
 		{
 			glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 		}
-		void setMat4(const std::string &name, glm::mat4 &trans) const
+		void setMat4(const STRING &name, MAT4 &trans) const
 		{
 			glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()) , 1, GL_FALSE, glm::value_ptr(trans));
 		}
 
-		void setShaderproperty(const std::string name, float value) 
+		void setVec3(const STRING &name,VEC3 &vec)
+		{
+			glUniform3f(glGetUniformLocation(ID, name.c_str()),vec.x,vec.y,vec.z);
+		}
+		void setShaderproperty(const STRING name, float value)
 		{
 			ShaderProperty temp;
 			temp.propertyname = name;
@@ -99,7 +106,7 @@ namespace myrender {
 			propertyvector.push_back(temp);
 			setFloat(name, value);
 		}
-		void setShaderproperty(const std::string name, bool value)
+		void setShaderproperty(const STRING name, bool value)
 		{
 			ShaderProperty temp;
 			temp.propertyname = name;
@@ -108,7 +115,7 @@ namespace myrender {
 			propertyvector.push_back(temp);
 			setBool(name, value);
 		}
-		void setShaderproperty(const std::string name, int value)
+		void setShaderproperty(const STRING name, int value)
 		{
 			ShaderProperty temp;
 			temp.propertyname = name;
@@ -117,11 +124,16 @@ namespace myrender {
 			propertyvector.push_back(temp);
      		setInt(name, value);
 		}
-		void setShaderproperty(const std::string &name, glm::mat4 &trans)
+		void setShaderproperty(const STRING &name, MAT4 &trans)
 		{
 			setMat4(name, trans);
 		}
+		void setShaderproperty(const STRING &name, VEC3 &vec)
+		{
+			setVec3(name, vec);
+		}
 	private:
+		unsigned int ID;
 		enum PROPERTYVALUETYPE
 		{
 			BOOL,

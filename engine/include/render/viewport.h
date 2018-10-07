@@ -23,6 +23,7 @@ namespace myrender
 		GLfloat GetDeltaTime();
 		int  GetScreenWidth();
 		int  GetScreenHeight();
+		GLFWwindow* GetWindows();
 	private:
 		static ViewPort* instance;
 		GLFWwindow* _windows;

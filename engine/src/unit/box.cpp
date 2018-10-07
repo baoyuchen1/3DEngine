@@ -52,8 +52,8 @@ void myrender::Box::Draw()
 {
 	auto render = Render::getInstance();
 	_command->SetTriangleData(_triangle_data_i);
-	_command->SetShader(_shader);
 	_command->SetTransform(_model_mat);
+	_command->SetMaterial(_material);
 	render->AddRenderCommand(_command);
 }
 
@@ -75,4 +75,18 @@ void myrender::Box::MadeModelMat(glm::vec3 Pos, GLfloat angle, glm::vec3 aixs)
 {
 	_model_mat = glm::translate(_model_mat, Pos);//构造平移矩阵
 	_model_mat = glm::rotate(_model_mat, angle, aixs);//构造旋转矩阵
+}
+
+void myrender::Box::InitMaterial(Texture * diffuse, Texture * specular, float shininess)
+{
+	_material.diffuse = diffuse->GetTextureIndex();
+	_material.specular = diffuse->GetTextureIndex();
+	_material.shininess = shininess;
+}
+
+void myrender::Box::InitMaterial(int diffuse, int specular, float shininess)
+{
+	_material.diffuse = diffuse;
+	_material.specular = specular;
+	_material.shininess = shininess;
 }

@@ -5,6 +5,7 @@
 #define FSSUFFIX      STRING(".fs")
 #define VSSUFFIX      STRING(".vs")
 #define TEXTUREVECTOR     std::vector<Texture*>
+#define LIGHTINGVECTOR    std::vector<Lighting*>
 #define TEXTUREMAP     std::map<std::string,Texture*>
 #define TEXTUREVECTORITOR  std::vector<Texture*>::iterator
 #define SHADERPROVECTOR    std::vector<ShaderProperty>
@@ -20,8 +21,11 @@
 #define VECTOR        std::vector
 #define MAP           std::map
 #define VEC3          glm::vec3
+#define MAT4          glm::mat4
+#define PERSPECTIVE   glm::perspective
 #define FLOAT         GLfloat
 #define BOOL          GLboolean
+#define INITMAT        glm::make_mat4x4(InitMat4)
 static GLfloat InitMat4[] =
 {       
 	1,0,0,0,
@@ -58,6 +62,19 @@ struct V3F_V2F
 		float M[5];
 	};
 
+};
+
+enum Lighting_type
+{
+	BASELIGHTING,
+	POINTLIGHTING,
+	DIRECTIONLIGHTING,
+};
+
+enum Material_enum
+{
+	DIFFUSE,
+	SPECULAR,
 };
 
 struct  Box_Quad_Type
@@ -103,6 +120,13 @@ struct Texture_Data
 	int width, height, nrChannels;
 	bool enable;
 	bool  useMipmap;
+};
+
+struct Material
+{
+	int diffuse;
+	int specular;
+	float     shininess;
 };
 enum KeyBoardCode
 {

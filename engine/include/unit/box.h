@@ -19,6 +19,8 @@ namespace myrender {
 		void SetWorldPos(const glm::vec3 &p);
 		void SetShader(int s);
 		void MadeModelMat(glm::vec3 Pos, GLfloat angle, glm::vec3 aixs);
+		void InitMaterial(Texture* diffuse, Texture* specular, float shininess);
+		void InitMaterial(int diffuse, int specular, float shininess);
 	private:
 		Box_Quad_Type* _quads;
 		Triangle_Data* _triangle_data;
@@ -32,6 +34,7 @@ namespace myrender {
 		GLuint _VBO;
 		GLuint _EBO;
 		int _shader;
+		Material _material;
 		TEXTUREVECTOR _texture_vector;
 	};
 

@@ -13,4 +13,5 @@ void main()
 	// linearly interpolate between both textures (80% container, 20% awesomeface)
 	FragColor = mix(texture(ourTexture1, TexCoord), texture(ourTexture2, TexCoord), 0.2);
 	FragColor = texture(ourTexture1, TexCoord);
+	FragColor = vec4(100.0f,25,111,1);
 }
