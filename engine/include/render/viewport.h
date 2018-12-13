@@ -8,7 +8,7 @@ namespace myrender
 	class ViewPort :public Object
 	{
 	public:
-		static ViewPort* getInsatnce();
+		static ViewPort* getInstance();
 		virtual void Release();
 		void SetScreenSize(const int&w,const int&h);
 		void SetScreenName(const STRING &n);

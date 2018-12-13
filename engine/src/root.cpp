@@ -19,7 +19,11 @@ Image* myrender::Root::getImage()
 }
 ViewPort * myrender::Root::getViewPort()
 {
-	return ViewPort::getInsatnce();
+	return ViewPort::getInstance();
+}
+TextureManager * myrender::Root::getTextureManager()
+{
+	return TextureManager::getInstance();
 }
 Root::Root()
 {

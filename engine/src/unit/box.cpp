@@ -6,7 +6,10 @@ Box::Box()
 	_triangle_data = new Triangle_Data();
 	_triangle_data_i = new Triangle_Data_WithOut_Indics();
 	_command = new RenderTriangle();
+	_command->SetCommandType(Triangle_command_type::BOX);
+	_command->SetDepthType(GL_LEQUAL);
 	_model_mat = glm::make_mat4x4(InitMat4);
+	_texture_vector = new std::map<int, bool>;
 	//_initVAO();
 }
 
@@ -18,8 +21,9 @@ myrender::Box::~Box()
 
 void myrender::Box::InitTexture(char * imagepath)
 {
-	auto render = myrender::Root::getInstance()->getRender();
-	render->SetTexture(imagepath);
+	auto render = myrender::Root::getInstance()->getTextureManager();
+	int textureid = render->SetTexture(imagepath);
+	(*_texture_vector)[textureid] = true;
 }
 
 int myrender::Box::LoadTexture()
@@ -54,6 +58,7 @@ void myrender::Box::Draw()
 	_command->SetTriangleData(_triangle_data_i);
 	_command->SetTransform(_model_mat);
 	_command->SetMaterial(_material);
+	
 	render->AddRenderCommand(_command);
 }
 
@@ -61,21 +66,6 @@ void myrender::Box::Release()
 {
 }
 
-void myrender::Box::SetWorldPos(const glm::vec3 & p)
-{
-	_world_pos = p;
-}
-
-void myrender::Box::SetShader(int s)
-{
-	_shader = s;
-}
-
-void myrender::Box::MadeModelMat(glm::vec3 Pos, GLfloat angle, glm::vec3 aixs)
-{
-	_model_mat = glm::translate(_model_mat, Pos);//构造平移矩阵
-	_model_mat = glm::rotate(_model_mat, angle, aixs);//构造旋转矩阵
-}
 
 void myrender::Box::InitMaterial(Texture * diffuse, Texture * specular, float shininess)
 {
@@ -89,4 +79,6 @@ void myrender::Box::InitMaterial(int diffuse, int specular, float shininess)
 	_material.diffuse = diffuse;
 	_material.specular = specular;
 	_material.shininess = shininess;
+	_command->SetTexture(_material.diffuse);
+	_command->SetTexture(_material.specular);
 }

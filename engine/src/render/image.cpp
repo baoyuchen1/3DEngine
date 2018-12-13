@@ -25,6 +25,7 @@ void myrender::Image::SetFlipVerticallOnLoad(bool state)
 
 unsigned char * myrender::Image::LoadImageData(char const * filename, int * x, int * y, int * comp, int req_comp)
 {
+
 	return stbi_load(filename, x, y, comp, req_comp);
 }
 

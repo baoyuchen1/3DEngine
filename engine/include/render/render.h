@@ -8,6 +8,7 @@
 namespace myrender {
 	class Camera;
 	class Lighting;
+	class RenderSkybox;
 	class Render
 	{
 	public:
@@ -24,16 +25,13 @@ namespace myrender {
 		void UseShder();
 		void UseShader(const STRING &name);
 		void Release();
-		void InitTexture(char* imagepath);
 		void AddRenderCommand(RenderCommand *command);
-		void BlindTexture();
-		bool CheckTextureExist(char* name);
-		GLuint SetTexture(char* t);
 		int  GetShaderByName(char* name);
 		int Draw();
 		void SetVAO(float * vertices, int vertocessize);
 		Camera* GetCamera();
 		GLint GetVBO();
+		void SetSkybox(RenderSkybox* s);
 		int GetShaderByName(STRING shadername);
 		void CreatNewLighting(const VEC3 &pos, const VEC3 &color, Lighting_type);
 		Lighting* GetLightByIndex(const int& index);
@@ -48,6 +46,7 @@ namespace myrender {
 		Render(const Render&);
 		void _drawLighting();
 		void _drawBox();
+		void _drawSkybox();
 		void _generateViewMat4();
 		static Render* instance;		
 		Camera*     _camera;
@@ -55,7 +54,7 @@ namespace myrender {
 		MAP<STRING,Shader*>  OurShader;
 		RENDERQUADVECTOR  _commandList;
 		LIGHTINGVECTOR    _lightingList;
-		TEXTUREMAP        _textureMap;
+		RenderSkybox* _skybox;
 		MAT4    _projection;
 		MAT4    _view;
 	};

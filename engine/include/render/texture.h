@@ -2,8 +2,9 @@
 #include"../unit/object.h"
 #include"../constant/engine_constant.h"
 #include"shader.h"
-#include"image.h"
+#include"../root.h"
 #include<string>
+
 namespace myrender
 {
 	class Texture :public Object
@@ -21,7 +22,8 @@ namespace myrender
 		int GetTextureTarget();
 		void BlindTexture();
 		void Init(STRING texture_path);
-		void LoadTexture();
+		bool LoadTexture();
+		bool LoadCubeTexture();
 		GLuint GetTextureIndex();
 		virtual void Release();
 	private:

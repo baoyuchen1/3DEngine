@@ -6,7 +6,7 @@
 #define VSSUFFIX      STRING(".vs")
 #define TEXTUREVECTOR     std::vector<Texture*>
 #define LIGHTINGVECTOR    std::vector<Lighting*>
-#define TEXTUREMAP     std::map<std::string,Texture*>
+#define TEXTUREMAP     std::map<int,myrender::Texture*>
 #define TEXTUREVECTORITOR  std::vector<Texture*>::iterator
 #define SHADERPROVECTOR    std::vector<ShaderProperty>
 #define RENDERQUADVECTOR   std::vector<RenderCommand*>
@@ -33,7 +33,6 @@ static GLfloat InitMat4[] =
 	0,0,1,0,
 	0,0,0,1,
 };
-
 
 struct V3F_V3F_V2F
 {
@@ -75,6 +74,12 @@ enum Material_enum
 {
 	DIFFUSE,
 	SPECULAR,
+};
+
+enum Triangle_command_type
+{
+	BOX,
+	SKYBOX,
 };
 
 struct  Box_Quad_Type

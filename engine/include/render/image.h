@@ -1,6 +1,6 @@
 #pragma once
 #include"../constant/includefile.h"
-
+#include"../../../3rd/OpenGL/include/FreeImage.h"
 namespace myrender
 {
 	class Image

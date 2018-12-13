@@ -11,5 +11,12 @@ namespace myrender {
 		virtual void Release();
 		virtual void LoadVertexArry();
 		virtual void Init();
+		void SetShader(const int &shader);
+		int GetShader();
+		int GetDepthType();
+		void SetDepthType(const int &depth);
+	protected:
+		int    _depthtype;
+		int    _shader;
 	};
 }

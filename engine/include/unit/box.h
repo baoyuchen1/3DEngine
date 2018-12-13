@@ -10,15 +10,12 @@ namespace myrender {
 	public:
 		Box();
 		~Box();
-		void InitTexture(char * imagepath);
-		int LoadTexture();
+		virtual void InitTexture(char * imagepath);
+		virtual int LoadTexture();
 		void InitVertices(float* vertices, unsigned int* indics,int indicssize,int vertocessize);
 		void InitVertices(float* vertices,int vertocessize);
-		void Draw();
-		void Release();
-		void SetWorldPos(const glm::vec3 &p);
-		void SetShader(int s);
-		void MadeModelMat(glm::vec3 Pos, GLfloat angle, glm::vec3 aixs);
+		virtual void Draw();
+		virtual void Release();
 		void InitMaterial(Texture* diffuse, Texture* specular, float shininess);
 		void InitMaterial(int diffuse, int specular, float shininess);
 	private:
@@ -28,14 +25,11 @@ namespace myrender {
 		unsigned int* _indics;
 		RenderTriangle* _command;
 		int _indicssize;
-		glm::vec3 _world_pos;
-		glm::mat4 _model_mat;
 		GLuint _VAO;
 		GLuint _VBO;
 		GLuint _EBO;
-		int _shader;
 		Material _material;
-		TEXTUREVECTOR _texture_vector;
+		std::map<int, bool > *_texture_vector;
 	};
 
 }

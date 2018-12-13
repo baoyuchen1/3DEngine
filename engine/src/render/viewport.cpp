@@ -2,7 +2,7 @@
 myrender::ViewPort* myrender::ViewPort::instance = nullptr;
 myrender::MouseMoveEvent myrender::ViewPort::_mousemove_event = MouseMoveEvent();
 myrender::MouseScrollEvent myrender::ViewPort::_mousescroll_event = MouseScrollEvent();
-myrender::ViewPort * myrender::ViewPort::getInsatnce()
+myrender::ViewPort * myrender::ViewPort::getInstance()
 {
 	if (instance == nullptr)
 		instance = new ViewPort();
@@ -65,7 +65,7 @@ void myrender::ViewPort::_processInput(GLFWwindow* window, int key, int scancode
 {
 	if (key == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
-	auto viewport = ViewPort::getInsatnce();
+	auto viewport = ViewPort::getInstance();
 	for (auto&it: viewport->_keyboard_funclist)
 	{
 		it(key);
@@ -116,7 +116,7 @@ void myrender::ViewPort::_framebuffer_size_callback(GLFWwindow * windows, int wi
 void myrender::ViewPort::_mousemove_callback(GLFWwindow * window, double xpos, double ypos)
 {
 	ViewPort::_mousemove_event.InitEvent(xpos, ypos,true);
-	auto viewport = ViewPort::getInsatnce();
+	auto viewport = ViewPort::getInstance();
 	for (auto&it : viewport->_mousemove_funclist)
 	{
 		it(ViewPort::_mousemove_event);
@@ -125,7 +125,7 @@ void myrender::ViewPort::_mousemove_callback(GLFWwindow * window, double xpos, d
 void myrender::ViewPort::_mousescroll_callback(GLFWwindow * window, double xoffset, double yoffset)
 {  
 	ViewPort::_mousescroll_event.InitEvent(yoffset);
-	auto viewport = ViewPort::getInsatnce();
+	auto viewport = ViewPort::getInstance();
 	for (auto&it : viewport->_mousescroll_funclist)
 	{
 		it(ViewPort::_mousescroll_event);

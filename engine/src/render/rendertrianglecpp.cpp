@@ -26,6 +26,15 @@ void myrender::RenderTriangle::SetTexture(Texture * texture)
 {
 	_texture_vector.push_back(texture);
 }
+void myrender::RenderTriangle::SetTexture(const int & textureid)
+{
+	auto texturemanager = Root::getInstance()->getTextureManager();
+	auto texture = texturemanager->GetTextureByID(textureid);
+	if (texture != nullptr)
+	{
+		_texture_vector.push_back(texture);
+	}
+}
 void myrender::RenderTriangle::SetMaterial(const Material &m)
 {
 	_material = m;
@@ -33,11 +42,6 @@ void myrender::RenderTriangle::SetMaterial(const Material &m)
 void myrender::RenderTriangle::SetTriangleData(Triangle_Data_WithOut_Indics * data)
 {
 	_triangle_i = data;
-}
-
-void myrender::RenderTriangle::SetShader(int shader)
-{
-	_shader = shader;
 }
 
 void myrender::RenderTriangle::SetTransform(glm::mat4 t)
@@ -48,15 +52,33 @@ void myrender::RenderTriangle::SetTransform(glm::mat4 t)
 void myrender::RenderTriangle::SetMaterialShader()
 {
 	auto render = myrender::Render::getInstance();
-	int shader = render->GetShaderByName("pointlighting");
-	render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
-	render->setShaderproperty(shader, "material.specular", _material.specular - 1);
-	render->setShaderproperty(shader, "material.shininess", _material.shininess);
-	shader = render->GetShaderByName("directionlighting");
-	render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
-	render->setShaderproperty(shader, "material.specular", _material.specular - 1);
-	render->setShaderproperty(shader, "material.shininess", _material.shininess);
+	int shader;
+	if (_commandtype == Triangle_command_type::BOX)
+	{
+		shader = render->GetShaderByName("pointlighting");
+		render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
+		render->setShaderproperty(shader, "material.specular", _material.specular - 1);
+		render->setShaderproperty(shader, "material.shininess", _material.shininess);
+		shader = render->GetShaderByName("directionlighting");
+		render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
+		render->setShaderproperty(shader, "material.specular", _material.specular - 1);
+		render->setShaderproperty(shader, "material.shininess", _material.shininess);
+	}
+	else if (_commandtype == Triangle_command_type::SKYBOX)
+	{
+		shader = render->GetShaderByName("skybox");
+
+	}
+
 }
+
+void myrender::RenderTriangle::SetCommandType(Triangle_command_type t)
+{
+	_commandtype = t;
+}
+
+
+
 
 void myrender::RenderTriangle::LoadTexture()
 {
@@ -68,9 +90,14 @@ void myrender::RenderTriangle::LoadTexture()
 void myrender::RenderTriangle::Draw()
 {
 	auto render = myrender::Render::getInstance();
+	for (auto &it : _texture_vector)
+	{
+		it->BlindTexture();
+	}
 	render->SetLightModel(_transform);
 	SetMaterialShader();
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	
 }
 void myrender::RenderTriangle::Release()
 {

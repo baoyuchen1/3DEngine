@@ -15,3 +15,6 @@
 #include <sstream>
 #include <iostream>
 #include <functional>
+#include "../../../3rd/OpenGL/include/assimp/Importer.hpp"
+#include "../../../3rd/OpenGL/include/assimp/scene.h"
+#include "../../../3rd/OpenGL/include/assimp/postprocess.h"

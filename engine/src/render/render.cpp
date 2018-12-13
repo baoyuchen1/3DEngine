@@ -1,10 +1,10 @@
 #include"../../include/render/render.h"
 #include"../../include/camera/camera.h"
+#include"../../include/render/renderskybox.h"
 namespace myrender {
 	Render* Render::instance = nullptr;
 	Render::Render()
 	{
-		_textureMap.clear();
 	}
 	Render::Render(const Render &)
 	{
@@ -20,31 +20,20 @@ namespace myrender {
 			{
 				it->Draw();
 			}
-			
 		}
+		glBindVertexArray(0);
 	}
 	void Render::_drawBox()
 	{
-		BlindTexture();
+		TextureManager* texturemanager = Root::getInstance()->getTextureManager();
 		glBindVertexArray(_VAO);
 		_drawLighting();
 		_commandList.clear();
-		glBindVertexArray(0);
-		int shader = GetShaderByName("transform");
-		UseShader("transform");
-		setShaderproperty(shader, "view", _view);
-		setShaderproperty(shader, "projection", _projection);
-		glBindVertexArray(Lighting::GetVAO());
-		for (auto &it : _lightingList)
-		{
-			MAT4 model = INITMAT;
-			model = glm::translate(model, it->GetPos());
-			model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-			setShaderproperty(shader, "model", model);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-		
-		glBindVertexArray(0);
+
+	}
+	void Render::_drawSkybox()
+	{
+		_skybox->Draw();
 	}
 	void Render::_generateViewMat4()
 	{
@@ -74,6 +63,7 @@ namespace myrender {
 		IncludeShader("pointlighting");
 		IncludeShader("directionlighting");
 		IncludeShader("transform");	
+		IncludeShader("skybox");
 	}
 
 	int Render::LoardVertexArry(float vertices[], unsigned int indices[], int verticessize, int indicessize)
@@ -216,55 +206,10 @@ namespace myrender {
 		glfwTerminate();
 	}
 
-	void Render::InitTexture(char * imagepath)
-	{
-	}
 
 	void Render::AddRenderCommand(RenderCommand * command)
 	{
 		_commandList.push_back(command);
-	}
-
-	void Render::BlindTexture()
-	{
-		int shader = OurShader["transform"]->GetID();
-		int i = 1;
-		for (auto &it : _textureMap)
-		{
-			it.second->BlindTexture();
-			/*std::string res = "ourTexture" + std::to_string(i);
-			setShaderproperty(shader, res, i - 1);*/
-			i++;
-		}
-	/*	 shader = OurShader["lighting"]->GetID();
-		i = 1;
-		for (auto &it : _textureMap)
-		{
-			std::string res = "ourTexture" + std::to_string(i);
-			setShaderproperty(shader, res, i - 1);
-			i++;
-		}*/
-	}
-
-	bool Render::CheckTextureExist(char * name)
-	{
-		return (_textureMap[name]==nullptr);
-	}
-
-	GLuint Render::SetTexture(char * t)
-	{
-		if (t == nullptr)
-			return -1;
-
-		if (CheckTextureExist(t))
-		{
-			auto texture = new Texture();
-			texture->Init(t);
-			texture->LoadTexture();
-			_textureMap[t] = texture;
-			return texture->GetTextureIndex();
-		}
-		return -1;
 	}
 
 
@@ -282,6 +227,8 @@ namespace myrender {
 		_generateViewMat4();
 		RenderBackGround();
 		_drawBox();
+		_drawSkybox();
+		glfwPollEvents();
 		viewport->SwapBuffers();
 		return 0;
 	}
@@ -316,6 +263,10 @@ namespace myrender {
 		return _VBO;
 	}
 
+	void Render::SetSkybox(RenderSkybox * s)
+	{
+		_skybox = s;
+	}
 	int Render::GetShaderByName(STRING shadername)
 	{
 		Shader* shader = OurShader[shadername.c_str()];
@@ -363,14 +314,14 @@ namespace myrender {
 
 	void Render::ReadyForDraw()
 	{
-		int shader = GetShaderByName("pointlighting");
-		OurShader["pointlighting"]->use();
+		int shader = GetShaderByName("directionlighting");
+		OurShader["directionlighting"]->use();
 	}
 
 	void Render::RenderBackGround()
 	{
-		glfwPollEvents();
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
