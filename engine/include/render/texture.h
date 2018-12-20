@@ -12,8 +12,11 @@ namespace myrender
 	public:
 		Texture();
 		~Texture();
-		Texture(const char* texture_path);
+		Texture(STRING texture_path, STRING texture_type, const int& nrComponents = 3, GLenum GLtype = GL_TEXTURE_2D);
+		Texture(const char* texture_path, const char* type);
 		const STRING GetPath();
+		const STRING GetTextureType();
+		void SetTextureType(const STRING &type);
 		int GetWidth();
 		int GetHeight();
 		void SetUseMipmp(bool enable);
@@ -21,7 +24,7 @@ namespace myrender
 		bool GetEnable();
 		int GetTextureTarget();
 		void BlindTexture();
-		void Init(STRING texture_path);
+		void Init(STRING texture_path, STRING texture_type, const int& nrComponents = 3, GLenum GLtype = GL_TEXTURE_2D);
 		bool LoadTexture();
 		bool LoadCubeTexture();
 		GLuint GetTextureIndex();

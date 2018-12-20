@@ -226,10 +226,10 @@ namespace myrender {
 		viewport->UpdateDeltaTime();
 		_generateViewMat4();
 		RenderBackGround();
-		_drawBox();
+		//_drawBox();
 		_drawSkybox();
 		glfwPollEvents();
-		viewport->SwapBuffers();
+		//viewport->SwapBuffers();
 		return 0;
 	}
 
@@ -321,7 +321,7 @@ namespace myrender {
 	void Render::RenderBackGround()
 	{
 		
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.5f, 0.5f, 1.0f, 0.5f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 

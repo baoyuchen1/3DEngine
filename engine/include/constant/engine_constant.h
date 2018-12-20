@@ -49,6 +49,22 @@ struct V3F_V3F_V2F
 
 };
 
+struct V3F_4_V2F {
+	union 
+	{
+		struct 
+		{
+			glm::vec3 position;
+			glm::vec3 normal;
+			glm::vec2 texCoords;
+			glm::vec3 tangent;
+			glm::vec3 bitangent;
+		};
+		float M[14];
+	};
+
+};
+
 struct V3F_V2F
 {
 	union
@@ -119,10 +135,12 @@ struct Triangle_Data_WithOut_Indics
 struct Texture_Data
 {
 	GLenum textureTarget;  //GL_TEXTURE0
-	GLenum textureType;    //GL_TEXTURE_2D
+	GLenum GLtextureType;    //GL_TEXTURE_2D
+	GLenum image_format, data_format;
 	unsigned int texture;
 	STRING texturepath;
-	int width, height, nrChannels;
+	STRING textureType;
+	int width, height;
 	bool enable;
 	bool  useMipmap;
 };

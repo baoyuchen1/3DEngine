@@ -8,14 +8,29 @@ myrender::Texture::~Texture()
 {
 }
 
-myrender::Texture::Texture(const char * texture_path)
+myrender::Texture::Texture(STRING texture_path, STRING texture_type, const int & nrComponents, GLenum GLtype)
 {
-	Init(texture_path);
+	Init(texture_path, texture_type, nrComponents, GLtype);
+}
+
+myrender::Texture::Texture(const char * texture_path,const char* type)
+{
+	Init(texture_path, type);
 }
 
 const STRING myrender::Texture::GetPath()
 {
 	return _textureData.texturepath;
+}
+
+const STRING myrender::Texture::GetTextureType()
+{
+	return _textureData.textureType;
+}
+
+void myrender::Texture::SetTextureType(const STRING & type)
+{
+	_textureData.textureType = type;
 }
 
 int myrender::Texture::GetWidth()
@@ -45,19 +60,35 @@ bool myrender::Texture::GetEnable()
 
 int myrender::Texture::GetTextureTarget()
 {
-	return _textureData.textureType;
+	return _textureData.GLtextureType;
 }
 
 void myrender::Texture::BlindTexture()
 {
 	glActiveTexture(_textureData.textureTarget);
-	glBindTexture(_textureData.textureType, _textureData.texture);
+	glBindTexture(_textureData.GLtextureType, _textureData.texture);
 }
 
-void myrender::Texture::Init(STRING texture_path)
+void myrender::Texture::Init(STRING texture_path, STRING texture_type, const int& nrComponents, GLenum GLtype)
 {
 	_textureData.enable = true;
 	_textureData.texturepath = texture_path;  
+	_textureData.GLtextureType = GLtype;
+	if (nrComponents == 1)
+	{
+		_textureData.image_format = GL_RED;
+		_textureData.data_format = GL_RED;
+	}
+	else if (nrComponents == 3)
+	{
+		_textureData.image_format = GL_RGB;
+		_textureData.data_format = GL_BGR;
+	}
+	else if (nrComponents == 4)
+	{
+		_textureData.image_format = GL_RGBA;
+		_textureData.data_format = GL_BGRA;
+	}
 }
 
 bool myrender::Texture::LoadTexture()
@@ -82,6 +113,7 @@ bool myrender::Texture::LoadTexture()
 	//if the image failed to load, return failure
 	if (!dib)
 		return false;
+	int bpp = FreeImage_GetBPP(dib);
 	//retrieve the image data
 	bits = FreeImage_GetBits(dib);
 	//get the image width and height
@@ -90,19 +122,18 @@ bool myrender::Texture::LoadTexture()
 	//if this somehow one of these failed (they shouldn't), return failure
 	if ((bits == 0) || (_textureData.width == 0) || (_textureData.height == 0))
 		return false;
-
+		
 	glGenTextures(1, &_textureData.texture);
-	glBindTexture(GL_TEXTURE_2D, _textureData.texture);
+	glBindTexture(_textureData.GLtextureType, _textureData.texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, _textureData.width, _textureData.height,
-		0, GL_BGR, GL_UNSIGNED_BYTE, bits);
+	glTexImage2D(_textureData.GLtextureType, 0, _textureData.image_format, _textureData.width, _textureData.height,
+		0, _textureData.data_format, GL_UNSIGNED_BYTE, bits);
 	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(_textureData.GLtextureType, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(_textureData.GLtextureType, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	// set texture filtering parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	_textureData.textureType = GL_TEXTURE_2D;
+	glTexParameteri(_textureData.GLtextureType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(_textureData.GLtextureType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	_textureData.textureTarget = GL_TEXTURE0 + _index; //?
 	_textureData.enable = true;
 	_index++;
@@ -147,7 +178,7 @@ bool myrender::Texture::LoadCubeTexture()
 		if ((bits == 0) || (_textureData.width == 0) || (_textureData.height == 0))
 			return false;
 
-		_textureData.textureType = GL_TEXTURE_CUBE_MAP;
+		_textureData.GLtextureType = GL_TEXTURE_CUBE_MAP;
 		_textureData.textureTarget = GL_TEXTURE0;
 		_textureData.enable = true;
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+count, 0, GL_RGB, _textureData.width, _textureData.height,

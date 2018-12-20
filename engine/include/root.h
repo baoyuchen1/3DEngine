@@ -3,7 +3,8 @@
 #include"render/image.h"
 #include"render\viewport.h"
 #include"render\manager\texturemanager.h"
-namespace myrender {
+namespace myrender
+{
 	class Render;
 	class Image;
 	class Root
