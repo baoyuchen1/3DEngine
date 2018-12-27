@@ -3,21 +3,96 @@
 using namespace myrender;
 Model::Model(string const &path, bool gamma) : gammaCorrection(gamma)
 {
-	
+	_shader=Shader("./resource/shader/shader.vs", "./resource/shader/shader.fs");
 	loadModel(path);
+	auto render = Root::getInstance()->getRender();
+	this->_ID = render->AddModel(this);
 }
 
-void myrender::Model::Draw(Shader shader)
+void myrender::Model::SetShader(const STRING & shadername)
 {
-	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shader);
+	auto render = Root::getInstance()->getRender();
+	Shader* shader = render->GetShaderByName(shadername);
+	if (shader != nullptr)
+	{
+		_shader = (*shader);
+	}
+}
+
+void myrender::Model::SetPosition(const VEC3 & pos)
+{
+	_position = pos;
+}
+
+void myrender::Model::SetPosition(const float & x, const float & y, const float & z)
+{
+	_position = VEC3(x, y, z);
+}
+
+void myrender::Model::SetScale(const VEC3 & scale)
+{
+	_scale = scale;
+}
+
+void myrender::Model::SetScale(const float & x, const float & y, const float & z)
+{
+	_scale = VEC3(x, y, z);
+}
+
+VEC3 myrender::Model::GetPosition()
+{
+	return _position;
+}
+
+VEC3 myrender::Model::GetScale()
+{
+	return _scale;
+}
+
+void myrender::Model::Draw()
+{
+	for (unsigned int i = 0; i < _meshes.size(); i++)
+		_meshes[i].Draw(_shader);
+}
+
+void myrender::Model::Destory()
+{
+	auto render = Root::getInstance()->getRender();
+	render->RemoveModel(this->_ID);
+	delete this;
+
+}
+
+Shader myrender::Model::GetShader()
+{
+	return _shader;
+}
+
+vector<Mesh> myrender::Model::GetMesh()
+{
+	return _meshes;
+}
+
+myrender::Model::~Model()
+{
+
 }
 
 void myrender::Model::loadModel(string const & path)
 {
 	// read file via ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	const aiScene* scene;
+	auto render = Root::getInstance()->getRender();
+	_meshes = render->GetMesh(path);
+	_directory = path.substr(0, path.find_last_of('/'));
+	if (!_meshes.empty())
+	{
+		return;
+	}
+	render->SetMeshMap(path, this);
+	scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+	
 	// check for errors
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
@@ -25,7 +100,7 @@ void myrender::Model::loadModel(string const & path)
 		return;
 	}
 	// retrieve the directory path of the filepath
-	directory = path.substr(0, path.find_last_of('/'));
+	
 
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
@@ -39,7 +114,7 @@ void myrender::Model::processNode(aiNode * node, const aiScene * scene)
 		// the node object only contains indices to index the actual objects in the scene. 
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
+		_meshes.push_back(processMesh(mesh, scene));
 	}
 	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (unsigned int i = 0; i < node->mNumChildren; i++)
@@ -114,16 +189,16 @@ Mesh myrender::Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	// normal: texture_normalN
 
 	// 1. diffuse maps
-	vector<int> diffuseMaps = texturemanager->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", directory);
+	vector<int> diffuseMaps = texturemanager->loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", _directory);
 	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	// 2. specular maps
-	vector<int> specularMaps = texturemanager->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", directory);
+	vector<int> specularMaps = texturemanager->loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", _directory);
 	textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	// 3. normal maps
-	std::vector<int> normalMaps = texturemanager->loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal", directory);
+	std::vector<int> normalMaps = texturemanager->loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal", _directory);
 	textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	// 4. height maps
-	std::vector<int> heightMaps = texturemanager->loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height", directory);
+	std::vector<int> heightMaps = texturemanager->loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height", _directory);
 	textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 	// return a mesh object created from the extracted mesh data

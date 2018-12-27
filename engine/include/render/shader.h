@@ -7,7 +7,10 @@ namespace myrender {
 	{
 	public:
 		// ³ÌĞòID
-		
+		Shader()
+		{
+
+		}
 		unsigned int GetID()
 		{
 			return ID;

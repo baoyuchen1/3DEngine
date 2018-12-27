@@ -91,7 +91,7 @@ void myrender::SkyBox::Draw()
 	auto render = myrender::Render::getInstance();
 	_command->SetTexture(_textureid);
 	_command->SetVAO(_VAO);
-	int shader = render->GetShaderByName("skybox");
+	int shader = render->GetShaderIDByName("skybox");
 	render->setShaderproperty(shader, "skybox", 0);
 	render->SetSkybox(_command);
 }

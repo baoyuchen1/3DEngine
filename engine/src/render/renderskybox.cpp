@@ -57,7 +57,7 @@ void myrender::RenderSkybox::Draw()
 	{
 		it->BlindTexture();
 	}
-	int shader = render->GetShaderByName("skybox");
+	int shader = render->GetShaderIDByName("skybox");
 	render->UseShader("skybox");
 	render->setShaderproperty(shader, "view", glm::mat4(glm::mat3(render->GetViewMat())));
 	render->setShaderproperty(shader, "projection", render->GetProjectionMat());

@@ -1,6 +1,10 @@
 #include"../../include/render/render.h"
 #include"../../include/camera/camera.h"
 #include"../../include/render/renderskybox.h"
+#include"../../include/unit/model.h"
+#include"../../include/root.h"
+#include"../../include/render/lighting.h"
+#include"../../include/render/rendercommand.h"
 namespace myrender {
 	Render* Render::instance = nullptr;
 	Render::Render()
@@ -31,8 +35,24 @@ namespace myrender {
 		_commandList.clear();
 
 	}
+	void Render::_drawModel()
+	{
+		for (auto &it : _modelmap)
+		{
+			Shader shader = it->GetShader();
+			shader.setMat4("projection", _projection);
+			shader.setMat4("view", _view);
+			shader.use();
+			MAT4 model = glm::make_mat4x4(InitMat4);
+			model = glm::translate(model, it->GetPosition());
+			model = glm::scale(model, it->GetScale());
+			shader.setMat4("model", model);
+			it->Draw();
+		}
+	}
 	void Render::_drawSkybox()
 	{
+		if(_skybox)
 		_skybox->Draw();
 	}
 	void Render::_generateViewMat4()
@@ -126,7 +146,7 @@ namespace myrender {
 	{
 		for (auto &it : OurShader)
 		{
-			if (it.second->GetID() == shaderID)
+			if (it.second&&it.second->GetID() == shaderID)
 			{
 				it.second->setShaderproperty(name, value);
 				break;
@@ -150,11 +170,15 @@ namespace myrender {
 	int Render::IncludeShader(const GLchar * Path)
 	{
 		STRING path = STRING(Path);
-		STRING vertexPath = SHADER_PATH + path + VSSUFFIX;
-		STRING fragmentPath = SHADER_PATH + path + FSSUFFIX;
-		auto shader = new Shader(vertexPath.c_str(), fragmentPath.c_str());
-		OurShader[path] = shader;
-		return shader->GetID();
+		if (OurShader[path] == nullptr)
+		{
+			STRING vertexPath = SHADER_PATH + path + VSSUFFIX;
+			STRING fragmentPath = SHADER_PATH + path + FSSUFFIX;
+			auto shader = new Shader(vertexPath.c_str(), fragmentPath.c_str());
+			OurShader[path] = shader;
+			return shader->GetID();
+		}
+		return OurShader[path]->GetID();
 	}
 
 	void Render::setShaderproperty(int shaderID, const STRING & name, float value)
@@ -173,7 +197,7 @@ namespace myrender {
 	{
 		for (auto &it : OurShader)
 		{
-			if (it.second->GetID() == shaderID)
+			if (it.second&&it.second->GetID() == shaderID)
 			{
 				it.second->setShaderproperty(name, value);
 				break;
@@ -213,23 +237,53 @@ namespace myrender {
 	}
 
 
-	int Render::GetShaderByName(char * name)
-	{
-		if (OurShader[name])
-			return OurShader[name]->GetID();
-		return -1;
-	}
-
 	int Render::Draw()
 	{
 		auto viewport = Root::getInstance()->getViewPort();
 		viewport->UpdateDeltaTime();
 		_generateViewMat4();
 		RenderBackGround();
+		
+		//_gpassrender = false;
+		if (_gpassrender)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Shader* gshader = GetShaderByName(_gpassShader);
+			gshader->use();
+			gshader->setMat4("projection", _projection);
+			gshader->setMat4("view", _view);
+			
+			for (auto &it: _modelmap)
+			{
+				it->SetShader(_gpassShader);
+			}
+			_drawModel();
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			Shader* lshader = GetShaderByName(_lpassShader);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			lshader->use();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, _gPosition);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, _gNormal);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
+			for (auto &it : _defereedlightlist)
+			{
+				it->Draw();
+			}
+			DeferredLighting::DrawLight();
+		}
+		else
+		{
+			_drawModel();
+		}
+		
 		//_drawBox();
 		_drawSkybox();
 		glfwPollEvents();
-		//viewport->SwapBuffers();
+		viewport->SwapBuffers();
 		return 0;
 	}
 
@@ -267,7 +321,7 @@ namespace myrender {
 	{
 		_skybox = s;
 	}
-	int Render::GetShaderByName(STRING shadername)
+	int Render::GetShaderIDByName(const STRING &shadername)
 	{
 		Shader* shader = OurShader[shadername.c_str()];
 		if (shader == nullptr)
@@ -275,6 +329,12 @@ namespace myrender {
 		return shader->GetID();
 	}
 
+	Shader * Render::GetShaderByName(const STRING & shadername)
+	{
+		return OurShader[shadername.c_str()];
+	}
+
+	
 	void Render::CreatNewLighting(const VEC3 & pos, const VEC3 & color, Lighting_type l_type = Lighting_type::BASELIGHTING)
 	{
 		Lighting* light = nullptr;
@@ -308,14 +368,75 @@ namespace myrender {
 	{
 		for (auto &it: _lightingList)
 		{
-			it->SetModel(m);
+			//it->SetModel(m);
 		}
 	}
 
 	void Render::ReadyForDraw()
 	{
-		int shader = GetShaderByName("directionlighting");
-		OurShader["directionlighting"]->use();
+		int shader = GetShaderIDByName("directionlighting");
+		//OurShader["directionlighting"]->use();
+	}
+
+	void Render::SetupGBuffer(STRING GPASS, STRING LPASS)
+	{
+		IncludeShader(GPASS.c_str());
+		IncludeShader(LPASS.c_str());
+		_gpassShader = GPASS;
+		_lpassShader = LPASS;
+		_gpassrender = true;
+		_setupGBuffer();
+	}
+
+	void Render::_setupGBuffer()
+	{
+		auto viewport = Root::getInstance()->getViewPort();
+		int width = viewport->GetScreenWidth();
+		int height = viewport->GetScreenHeight();
+		Shader* shader = GetShaderByName(_lpassShader);
+		if (shader != nullptr)
+		{
+			shader->use();
+			glUniform1i(glGetUniformLocation(shader->GetID(), "gPosition"), 0);
+			glUniform1i(glGetUniformLocation(shader->GetID(), "gNormal"), 1);
+			glUniform1i(glGetUniformLocation(shader->GetID(), "gAlbedoSpec"), 2);
+		}
+		glGenFramebuffers(1, &_gBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, _gBuffer);
+		// - Position color buffer
+		glGenTextures(1, &_gPosition);
+		glBindTexture(GL_TEXTURE_2D, _gPosition);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _gPosition, 0);
+		// - Normal color buffer
+		glGenTextures(1, &_gNormal);
+		glBindTexture(GL_TEXTURE_2D, _gNormal);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _gNormal, 0);
+		// - Color + Specular color buffer
+		glGenTextures(1, &_gAlbedoSpec);
+		glBindTexture(GL_TEXTURE_2D, _gAlbedoSpec);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, _gAlbedoSpec, 0);
+		// - Tell OpenGL which color attachments we'll use (of this framebuffer) for rendering 
+		GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+		glDrawBuffers(3, attachments);
+		// - Create and attach depth buffer (renderbuffer)
+		glGenRenderbuffers(1, &_rboDepth);
+		glBindRenderbuffer(GL_RENDERBUFFER, _rboDepth);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _rboDepth);
+		// - Finally check if framebuffer is complete
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Framebuffer not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		DeferredLighting::SetShader(_lpassShader);
 	}
 
 	void Render::RenderBackGround()
@@ -333,6 +454,63 @@ namespace myrender {
 	MAT4 Render::GetProjectionMat()
 	{
 		return _projection;
+	}
+
+	int Render::AddModel(Model * model)
+	{
+		int index = 0;
+		if (index >= _modelmap.max_size())
+		{
+			_modelmap.resize(index * 2);
+		}
+		if (!_lastmodel.empty())
+		{
+			index = _lastmodel.top();
+			_lastmodel.pop();
+			_modelmap[index] = model;
+		}
+		else
+		{
+			_modelmap.push_back(model);
+		}
+		
+		return index;
+	}
+
+	void Render::RemoveModel(const int & modelid)
+	{
+		_modelmap[modelid] = nullptr;
+		_lastmodel.push(modelid);
+	}
+
+	Shader * Render::GetGpassShader()
+	{
+		return nullptr;
+	}
+
+	Shader * Render::GetLpassShader()
+	{
+		return nullptr;
+	}
+
+	int Render::AddDefereedlight(DeferredLighting *d)
+	{
+		_defereedlightlist.push_back(d);
+		return _defereedlightlist.size() - 1;
+	}
+
+	void Render::SetMeshMap(const STRING &p, Model *m)
+	{
+		_meshmap[p] = m;
+	}
+
+	VECTOR<Mesh> Render::GetMesh(const STRING &p)
+	{
+		if (_meshmap[p])
+		{
+			return _meshmap[p]->GetMesh();
+		}
+		return VECTOR<Mesh>();
 	}
 
 

@@ -55,18 +55,18 @@ void myrender::RenderTriangle::SetMaterialShader()
 	int shader;
 	if (_commandtype == Triangle_command_type::BOX)
 	{
-		shader = render->GetShaderByName("pointlighting");
+		shader = render->GetShaderIDByName("pointlighting");
 		render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
 		render->setShaderproperty(shader, "material.specular", _material.specular - 1);
 		render->setShaderproperty(shader, "material.shininess", _material.shininess);
-		shader = render->GetShaderByName("directionlighting");
+		shader = render->GetShaderIDByName("directionlighting");
 		render->setShaderproperty(shader, "material.diffuse", _material.diffuse - 1);
 		render->setShaderproperty(shader, "material.specular", _material.specular - 1);
 		render->setShaderproperty(shader, "material.shininess", _material.shininess);
 	}
 	else if (_commandtype == Triangle_command_type::SKYBOX)
 	{
-		shader = render->GetShaderByName("skybox");
+		shader = render->GetShaderIDByName("skybox");
 
 	}
 

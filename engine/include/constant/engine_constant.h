@@ -6,6 +6,7 @@
 #define VSSUFFIX      STRING(".vs")
 #define TEXTUREVECTOR     std::vector<Texture*>
 #define LIGHTINGVECTOR    std::vector<Lighting*>
+#define DEFERREDLIGHT     std::vector<DeferredLighting*>
 #define TEXTUREMAP     std::map<int,myrender::Texture*>
 #define TEXTUREVECTORITOR  std::vector<Texture*>::iterator
 #define SHADERPROVECTOR    std::vector<ShaderProperty>
@@ -18,6 +19,7 @@
 #define VBO_SIZE      65535
 #define INDICE_SIZE   65535
 #define STRING        std::string
+#define STACK         std::stack
 #define VECTOR        std::vector
 #define MAP           std::map
 #define VEC3          glm::vec3
@@ -147,9 +149,9 @@ struct Texture_Data
 
 struct Material
 {
-	int diffuse;
-	int specular;
-	float     shininess;
+	int   diffuse;
+	int   specular;
+	float shininess;
 };
 enum KeyBoardCode
 {

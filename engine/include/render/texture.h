@@ -1,9 +1,7 @@
 #pragma once
 #include"../unit/object.h"
-#include"../constant/engine_constant.h"
 #include"shader.h"
 #include"../root.h"
-#include<string>
 
 namespace myrender
 {

@@ -1,4 +1,6 @@
 #include"../../include/render/lighting.h"
+#include"../../include/render/shader.h"
+#include"../../include/camera/camera.h"
 namespace myrender
 {
 	GLuint Lighting::_lightVAO = 0;
@@ -58,7 +60,7 @@ namespace myrender
 	void Lighting::SetModel(const MAT4 & m)
 	{
 		auto render = Root::getInstance()->getRender();
-		int shader = render->GetShaderByName("lighting");
+		int shader = render->GetShaderIDByName("lighting");
 		render->setShaderproperty(shader, "model", m);
 	}
 	void Lighting::Release()
@@ -67,7 +69,7 @@ namespace myrender
 	void Lighting::Draw()
 	{
 		auto render = Root::getInstance()->getRender();
-		int shader = render->GetShaderByName("lighting");
+		int shader = render->GetShaderIDByName("lighting");
 		render->UseShader("lighting");
 		render->setShaderproperty(shader, "lightColor", _lightColor);
 		render->setShaderproperty(shader, "lightPos", _lightPos);
@@ -135,7 +137,7 @@ namespace myrender
 	void PointLighting::Draw()
 	{
 		auto render = Root::getInstance()->getRender();
-		int shader = render->GetShaderByName("pointlighting");
+		int shader = render->GetShaderIDByName("pointlighting");
 		render->UseShader("pointlighting");
 		render->setShaderproperty(shader, "light.ambient", _ambient);
 		render->setShaderproperty(shader, "light.diffuse", _diffuse);
@@ -151,7 +153,7 @@ namespace myrender
 	void PointLighting::SetModel(const MAT4 & m)
 	{
 		auto render = Root::getInstance()->getRender();
-		int shader = render->GetShaderByName("pointlighting");
+		int shader = render->GetShaderIDByName("pointlighting");
 		render->setShaderproperty(shader, "model", m);
 	}
 	DirectionLighting::DirectionLighting(const VEC3 & color, const VEC3 & pos)
@@ -194,7 +196,7 @@ namespace myrender
 	void DirectionLighting::Draw()
 	{
 		auto render = Root::getInstance()->getRender();
-		int shader = render->GetShaderByName("directionlighting");
+		int shader = render->GetShaderIDByName("GetShaderIDByName");
 		render->UseShader("directionlighting");
 		render->setShaderproperty(shader, "light.ambient", _ambient);
 		render->setShaderproperty(shader, "light.diffuse", _diffuse);
@@ -208,7 +210,147 @@ namespace myrender
 	void DirectionLighting::SetModel(const MAT4 & m)
 	{
 		auto render = Root::getInstance()->getRender();
-		int shader = render->GetShaderByName("directionlighting");
+		int shader = render->GetShaderIDByName("directionlighting");
 		render->setShaderproperty(shader, "model", m);
 	}
+	STRING DeferredLighting::_shadername = STRING();
+	GLuint DeferredLighting::_VAO = 0;
+	GLuint DeferredLighting::_VBO = 0;
+	DeferredLighting::DeferredLighting(const VEC3 & pos)
+	{
+		_position = pos;
+		auto render = Root::getInstance()->getRender();
+		_index = render->AddDefereedlight(this);
+	}
+
+	DeferredLighting::DeferredLighting()
+	{
+		auto render = Root::getInstance()->getRender();
+		_index = render->AddDefereedlight(this);
+	}
+
+	DeferredLighting::DeferredLighting(const VEC3 & pos, const VEC3 & dir, const VEC3 & color, const STRING shadername)
+	{
+		_direction = dir;
+		_position = pos;
+		_color = color;
+		auto render = Root::getInstance()->getRender();
+		DeferredLighting::_shadername = shadername;
+		_index = render->AddDefereedlight(this);
+	}
+
+	void DeferredLighting::SetDirection(const VEC3 &d)
+	{
+		_direction = d;
+	}
+	VEC3 DeferredLighting::GetDirection()
+	{
+		return _direction;
+	}
+	void DeferredLighting::SetPosition(const VEC3 &p)
+	{
+		_position = p;
+	}
+	VEC3 DeferredLighting::GetPosition()
+	{
+		return _position;
+	}
+	void DeferredLighting::SetIndex(const int & i)
+	{
+		_index = i;
+	}
+	void DeferredLighting::SetColor(const VEC3 &c)
+	{
+		_color = c;
+	}
+	VEC3 DeferredLighting::GetColor()
+	{
+		return _color;
+	}
+	void DeferredLighting::SetConstant(const float &c)
+	{
+		_constant = c;
+	}
+	float DeferredLighting::GetConstant()
+	{
+		return _constant;
+	}
+	void DeferredLighting::SetLinear(const float &l)
+	{
+		_linear = l;
+	}
+	float DeferredLighting::GetLinear()
+	{
+		return _linear;
+	}
+	void DeferredLighting::SetQuadratic(const float &q)
+	{
+		_quadratic = q;
+	}
+	float DeferredLighting::GetQuadratic()
+	{
+		return _quadratic;
+	}
+	void DeferredLighting::SetAttenuation(const float & c, const float & l, const float & q)
+	{
+		_constant = c;
+		_linear = l;
+		_quadratic = q;
+	}
+	void DeferredLighting::SetShader(const string &n)
+	{
+		_shadername = n;
+	}
+	void DeferredLighting::DrawLight()
+	{
+		if (_VAO == 0)
+		{
+			GLfloat quadVertices[] = {
+				// Positions        // Texture Coords
+				-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+				1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			};
+			// Setup plane VAO
+			glGenVertexArrays(1, &_VAO);
+			glGenBuffers(1, &_VBO);
+			glBindVertexArray(_VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		}
+		glBindVertexArray(_VAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
+	}
+	STRING DeferredLighting::GetShaderName()
+	{
+		return _shadername;
+	}
+	void DeferredLighting::Draw()
+	{
+		auto render = Root::getInstance()->getRender();
+
+		Shader* shader = render->GetShaderByName(DeferredLighting::GetShaderName());
+		STRING lightspre = "lights[" + std::to_string(_index) + "].";
+		if (shader != nullptr)
+		{
+			shader->setShaderproperty((lightspre + "Position"), _position);
+			shader->setShaderproperty((lightspre + "Color"), _color);
+			shader->setShaderproperty((lightspre + "Linear"), _linear);
+			shader->setShaderproperty((lightspre + "Quadratic"), _quadratic);
+			shader->setShaderproperty((lightspre + "Radius"), 1.0F);
+			VEC3 viewpos = render->GetCamera()->Position;
+			shader->setShaderproperty("viewPos", viewpos);
+		}
+
+	}
+	DeferredLighting::~DeferredLighting()
+	{
+	}
+
 }

@@ -19,9 +19,9 @@ namespace myrender
 		static void SetVBO(GLuint VBO);
 		void SetIndex(GLuint index);
 		static int GetVAO();
-		virtual void SetModel(const MAT4 &m);
 		virtual void Release();
 		virtual void Draw();
+		virtual void SetModel(const MAT4 & m);
 	private:
 		static GLuint _lightVAO;
 		static GLuint _lightVBO;
@@ -77,5 +77,40 @@ namespace myrender
 		FLOAT _constant;
 		FLOAT _linear;
 		FLOAT _quadratic;
+	};
+	class DeferredLighting : public Lighting
+	{
+	public:
+		DeferredLighting(const VEC3 &pos);
+		DeferredLighting();
+		DeferredLighting(const VEC3 &pos,const VEC3 &dir,const VEC3 &color,const STRING shadername);
+		void SetDirection(const VEC3&);
+		VEC3 GetDirection();
+		void SetPosition(const VEC3 &);
+		VEC3 GetPosition();
+		void SetIndex(const int& i);
+		void SetColor(const VEC3&);
+		VEC3 GetColor();
+		void SetConstant(const float&);
+		float GetConstant();
+		void SetLinear(const float &);
+		float GetLinear();
+		void SetQuadratic(const float &);
+		float GetQuadratic();
+		void SetAttenuation(const float&c, const float&l, const float &q);
+		static void SetShader(const STRING&);
+		static void DrawLight();
+		static STRING GetShaderName();
+		virtual void Draw();
+		void Destory();
+	private:
+		~DeferredLighting();
+		VEC3 _direction;
+		VEC3 _position;
+		VEC3 _color;
+		int _index;
+		static STRING _shadername;
+		static GLuint _VAO, _VBO;
+		float _constant, _linear, _quadratic;
 	};
 }
