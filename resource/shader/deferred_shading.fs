@@ -17,11 +17,11 @@ struct Light {
 const int NR_LIGHTS = 32;
 uniform Light lights[NR_LIGHTS];
 uniform vec3 viewPos;
-uniform mat4 model;
+
 //uniform int draw_mode;
 
 void main()
-{             
+{    
     int draw_mode = 1;
     // Retrieve data from gbuffer
     vec3 FragPos = texture(gPosition, TexCoords).rgb;
