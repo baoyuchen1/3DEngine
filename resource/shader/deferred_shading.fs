@@ -9,7 +9,8 @@ uniform sampler2D gAlbedoSpec;
 struct Light {
     vec3 Position;
     vec3 Color;
-    
+    float cutOff;
+    float outerCutOff;
     float Linear;
     float Quadratic;
     float Radius;
@@ -65,3 +66,4 @@ void main()
     else if(draw_mode == 5)
         FragColor = vec4(vec3(Specular), 1.0);
 }
+

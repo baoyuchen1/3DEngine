@@ -73,6 +73,7 @@ void myrender::Texture::Init(STRING texture_path, STRING texture_type, const int
 {
 	_textureData.enable = true;
 	_textureData.texturepath = texture_path;  
+	_textureData.textureType = texture_type;
 	_textureData.GLtextureType = GLtype;
 	if (nrComponents == 1)
 	{

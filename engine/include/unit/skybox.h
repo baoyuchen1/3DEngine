@@ -10,7 +10,7 @@ namespace myrender {
 	{
 	public:
 		SkyBox();
-		~SkyBox();
+		virtual ~SkyBox();
 		virtual void InitTexture(char * imagepath);
 		virtual int LoadTexture();
 		void InitVertices(float* vertices, unsigned int* indics, int indicssize, int vertocessize);

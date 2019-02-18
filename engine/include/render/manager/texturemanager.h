@@ -10,6 +10,7 @@ namespace myrender
 		~TextureManager();
 		static TextureManager* getInstance();
 		bool CheckTextureExist(STRING name);
+		int  GetTextureIndex(STRING name);
 		void BlindTexture();
 		GLuint SetTexture(STRING path,STRING type = STRING());
 		GLuint SetCubeTexture(STRING path, STRING type = STRING());

@@ -49,7 +49,7 @@ void myrender::RenderSkybox::LoadTexture()
 
 void myrender::RenderSkybox::Draw()
 {
-	
+	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glBindVertexArray(_buffers_VAO);
 	auto render = myrender::Render::getInstance();

@@ -37,18 +37,38 @@ namespace myrender {
 	}
 	void Render::_drawModel()
 	{
+		Shader shader;
+		glm::vec3 lightPositions[] = {
+			glm::vec3(0.0f, 0.0f, 10.0f),
+		};
+		glm::vec3 lightColors[] = {
+			glm::vec3(150.0f, 150.0f, 150.0f),
+		};
+		int nrRows = 7;
+		int nrColumns = 7;
+		float spacing = 2.5;
 		for (auto &it : _modelmap)
 		{
-			Shader shader = it->GetShader();
+			shader = it->GetShader();
+			shader.use();
+			for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+			{
+				glm::vec3 newPos = lightPositions[i] + glm::vec3(sin(glfwGetTime() * 5.0) * 5.0, 0.0, 0.0);
+				newPos = lightPositions[i];
+				shader.setVec3("lightPositions[" + std::to_string(i) + "]", newPos);
+				shader.setVec3("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+			}
 			shader.setMat4("projection", _projection);
 			shader.setMat4("view", _view);
-			shader.use();
+			
 			MAT4 model = glm::make_mat4x4(InitMat4);
 			model = glm::translate(model, it->GetPosition());
 			model = glm::scale(model, it->GetScale());
 			shader.setMat4("model", model);
 			it->Draw();
 		}
+
+
 	}
 	void Render::_drawSkybox()
 	{
@@ -274,6 +294,12 @@ namespace myrender {
 				it->Draw();
 			}
 			DeferredLighting::DrawLight();
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, _gBuffer);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			glBlitFramebuffer(
+				0, 0, viewport->GetScreenWidth(), viewport->GetScreenHeight(), 0, 0, viewport->GetScreenWidth(), viewport->GetScreenHeight(), GL_DEPTH_BUFFER_BIT, GL_NEAREST
+			);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 		else
 		{
@@ -323,6 +349,7 @@ namespace myrender {
 	}
 	int Render::GetShaderIDByName(const STRING &shadername)
 	{
+		IncludeShader(shadername.c_str());
 		Shader* shader = OurShader[shadername.c_str()];
 		if (shader == nullptr)
 			return 0;
@@ -331,6 +358,7 @@ namespace myrender {
 
 	Shader * Render::GetShaderByName(const STRING & shadername)
 	{
+		IncludeShader(shadername.c_str());
 		return OurShader[shadername.c_str()];
 	}
 

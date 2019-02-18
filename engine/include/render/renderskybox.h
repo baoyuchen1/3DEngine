@@ -8,7 +8,7 @@ namespace myrender
 	{
 	public:
 		RenderSkybox();
-		~RenderSkybox();
+		virtual ~RenderSkybox();
 		void SetTexture(Texture* texture);
 		void SetTexture(const int& textureid);
 		void SetTriangleData(Triangle_Data_WithOut_Indics *data);

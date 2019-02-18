@@ -42,6 +42,16 @@ bool myrender::TextureManager::CheckTextureExist(STRING name)
 	return true;
 }
 
+int myrender::TextureManager::GetTextureIndex(STRING name)
+{
+	for (auto &it : _textureMap)
+	{
+		if (it.second->GetPath() == name)
+			return it.second->GetTextureIndex();
+	}
+	return -1;
+}
+
 void myrender::TextureManager::BlindTexture()
 {
 	for (auto &it : _textureMap)
@@ -54,14 +64,15 @@ void myrender::TextureManager::BlindTexture()
 GLuint myrender::TextureManager::SetTexture(STRING path, STRING type )
 {
 
-	if (CheckTextureExist(path))
+	int textureindex = GetTextureIndex(path);
+	if (textureindex == -1)
 	{
 		auto texture = new Texture(path, type);
 		texture->LoadTexture();
 		_textureMap[texture->GetTextureIndex()] = texture;
 		return texture->GetTextureIndex();
 	}
-	return -1;
+	return textureindex;
 }
 
 GLuint myrender::TextureManager::SetCubeTexture(STRING path, STRING type )
@@ -100,7 +111,6 @@ vector<int> TextureManager::loadMaterialTextures(aiMaterial * mat, aiTextureType
 			auto texture = new Texture(str.C_Str(), typeName);
 			if (texture->LoadTexture())
 			{
-				texture->SetTextureType(typeName);
 				_textureMap[texture->GetTextureIndex()] = texture;
 				textures.push_back(texture->GetTextureIndex());
 			}

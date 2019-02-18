@@ -8,7 +8,7 @@ namespace myrender
 	{
 	public:
 		RenderTriangle();
-		~RenderTriangle();
+		virtual ~RenderTriangle();
 		void Init(Texture* texture, Triangle_Data* triangle);
 		void SetTriangleData(Triangle_Data *data);
 		void Init(Texture* texture, Triangle_Data_WithOut_Indics* triangle);

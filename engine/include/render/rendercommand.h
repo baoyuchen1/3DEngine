@@ -5,7 +5,7 @@ namespace myrender {
 	{   
 	public:
 		RenderCommand();
-		~RenderCommand();
+		virtual ~RenderCommand();
 		virtual void Draw() ;
 		virtual void LoadTexture();
 		virtual void Release();

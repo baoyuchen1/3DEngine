@@ -24,6 +24,7 @@ namespace myrender {
 			std::string fragmentCode;
 			std::ifstream vShaderFile;
 			std::ifstream fShaderFile;
+			_name = vertexPath;
 			// ensure ifstream objects can throw exceptions:
 			vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 			fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -137,6 +138,7 @@ namespace myrender {
 		}
 	private:
 		unsigned int ID;
+		STRING _name;
 		enum PROPERTYVALUETYPE
 		{
 			BOOL,

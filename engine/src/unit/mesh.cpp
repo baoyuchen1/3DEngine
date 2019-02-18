@@ -15,10 +15,7 @@ Mesh::Mesh(vector<V3F_4_V2F> vertices, vector<unsigned int> indices, vector<unsi
 void Mesh::Draw(Shader shader)
 {
 	// bind appropriate textures
-	GLuint diffuseNr = 1;
-	GLuint specularNr = 1;
-	GLuint normalNr = 1;
-	GLuint heightNr = 1;
+	std::map<STRING, int> textureindexmap;
 	for (GLuint i = 0; i < _textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
@@ -27,17 +24,16 @@ void Mesh::Draw(Shader shader)
 		TextureManager* texturemanager = Root::getInstance()->getTextureManager();
 		Texture* texture = texturemanager->GetTextureByID(_textures[i]);
 		string name = texture->GetTextureType();
-		if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
-		else if (name == "texture_specular")
-			number = std::to_string(specularNr++); // transfer unsigned int to stream
-		else if (name == "texture_normal")
-			number = std::to_string(normalNr++); // transfer unsigned int to stream
-		else if (name == "texture_height")
-			number = std::to_string(heightNr++); // transfer unsigned int to stream
+		if (name.empty())
+			continue;
+		if (textureindexmap.find(name) == textureindexmap.end())
+		{
+			textureindexmap[name] = 1;	
+		}
+		number = std::to_string(textureindexmap[name]++);
 
-												 // now set the sampler to the correct texture unit
-		glUniform1i(glGetUniformLocation(shader.GetID(), (name + number).c_str()), i);
+		// now set the sampler to the correct texture unit
+		glUniform1i(glGetUniformLocation(shader.GetID(), (name).c_str()), i);
 		// and finally bind the texture
 		glBindTexture(GL_TEXTURE_2D, texture->GetTextureIndex());
 	}

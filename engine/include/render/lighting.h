@@ -8,7 +8,7 @@ namespace myrender
 	{
 	public:
 		Lighting();
-		~Lighting();
+		virtual ~Lighting();
 		Lighting(const VEC3 &color,const VEC3 &pos);
 		void SetPos(const VEC3 &pos);
 		VEC3 GetPos();
@@ -104,7 +104,7 @@ namespace myrender
 		virtual void Draw();
 		void Destory();
 	private:
-		~DeferredLighting();
+		virtual ~DeferredLighting();
 		VEC3 _direction;
 		VEC3 _position;
 		VEC3 _color;

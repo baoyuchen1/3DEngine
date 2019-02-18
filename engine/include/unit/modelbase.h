@@ -7,7 +7,7 @@ namespace myrender
 	{
 	public:
 		ModelBase();
-		~ModelBase();
+		virtual ~ModelBase();
 		void SetWorldPos(const glm::vec3 &p);
 		void SetShader(int s);
 		void MadeModelMat(glm::vec3 Pos, GLfloat angle, glm::vec3 aixs);
